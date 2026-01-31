@@ -1,0 +1,6 @@
+app_identifier("space.bethan.fishcatcher")
+apple_id("your-apple-id@email.com")  # Your Apple ID email
+team_id("7ZF2Z8TUY4")
+
+# App Store Connect API Key (optional, for CI/CD)
+# app_store_connect_api_key_path("./fastlane/api_key.json")

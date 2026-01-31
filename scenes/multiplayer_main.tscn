@@ -1,0 +1,286 @@
+[gd_scene load_steps=7 format=3 uid="uid://mp_main123"]
+
+[ext_resource type="Script" path="res://scripts/multiplayer_main.gd" id="1_mp_main"]
+[ext_resource type="Script" path="res://scripts/fish_spawner.gd" id="2_spawner"]
+[ext_resource type="Script" path="res://scripts/claw.gd" id="3_claw"]
+[ext_resource type="Script" path="res://scripts/drop_zone.gd" id="4_dropzone"]
+[ext_resource type="Script" path="res://scripts/opponent_claw.gd" id="5_opponent_claw"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_grab"]
+radius = 30.0
+
+[node name="MultiplayerMain" type="Node2D"]
+script = ExtResource("1_mp_main")
+
+[node name="Sky" type="ColorRect" parent="."]
+offset_right = 720.0
+offset_bottom = 450.0
+color = Color(0.529, 0.808, 0.922, 1)
+
+[node name="Water" type="ColorRect" parent="."]
+offset_top = 450.0
+offset_right = 720.0
+offset_bottom = 1280.0
+color = Color(0.251, 0.643, 0.875, 1)
+
+[node name="FishSpawner" type="Node2D" parent="."]
+position = Vector2(0, 550)
+script = ExtResource("2_spawner")
+
+[node name="Claw" type="Node2D" parent="."]
+position = Vector2(360, 200)
+script = ExtResource("3_claw")
+
+[node name="Rope" type="Line2D" parent="Claw"]
+points = PackedVector2Array(0, -100, 0, 0)
+width = 4.0
+default_color = Color(0.545, 0.271, 0.075, 1)
+
+[node name="ClawHead" type="Node2D" parent="Claw"]
+
+[node name="ClawBase" type="Polygon2D" parent="Claw/ClawHead"]
+color = Color(0.6, 0.6, 0.6, 1)
+polygon = PackedVector2Array(-20, -10, 20, -10, 20, 10, -20, 10)
+
+[node name="ClawLeft" type="Polygon2D" parent="Claw/ClawHead"]
+position = Vector2(-15, 10)
+rotation = -0.261799
+color = Color(0.7, 0.7, 0.7, 1)
+polygon = PackedVector2Array(-8, 0, 8, 0, 5, 35, -5, 35)
+
+[node name="ClawRight" type="Polygon2D" parent="Claw/ClawHead"]
+position = Vector2(15, 10)
+rotation = 0.261799
+color = Color(0.7, 0.7, 0.7, 1)
+polygon = PackedVector2Array(-8, 0, 8, 0, 5, 35, -5, 35)
+
+[node name="GrabArea" type="Area2D" parent="Claw/ClawHead"]
+position = Vector2(0, 30)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Claw/ClawHead/GrabArea"]
+shape = SubResource("CircleShape2D_grab")
+
+[node name="YouLabel" type="Label" parent="Claw"]
+offset_left = -30.0
+offset_top = -130.0
+offset_right = 30.0
+offset_bottom = -110.0
+theme_override_colors/font_color = Color(0.3, 1, 0.5, 1)
+theme_override_font_sizes/font_size = 14
+text = "YOU"
+horizontal_alignment = 1
+
+[node name="OpponentClaw" type="Node2D" parent="."]
+position = Vector2(360, 200)
+script = ExtResource("5_opponent_claw")
+
+[node name="Rope" type="Line2D" parent="OpponentClaw"]
+points = PackedVector2Array(0, -100, 0, 0)
+width = 4.0
+default_color = Color(0.8, 0.2, 0.2, 1)
+
+[node name="ClawHead" type="Node2D" parent="OpponentClaw"]
+
+[node name="ClawBase" type="Polygon2D" parent="OpponentClaw/ClawHead"]
+color = Color(0.8, 0.3, 0.3, 1)
+polygon = PackedVector2Array(-20, -10, 20, -10, 20, 10, -20, 10)
+
+[node name="ClawLeft" type="Polygon2D" parent="OpponentClaw/ClawHead"]
+position = Vector2(-15, 10)
+rotation = -0.261799
+color = Color(0.9, 0.4, 0.4, 1)
+polygon = PackedVector2Array(-8, 0, 8, 0, 5, 35, -5, 35)
+
+[node name="ClawRight" type="Polygon2D" parent="OpponentClaw/ClawHead"]
+position = Vector2(15, 10)
+rotation = 0.261799
+color = Color(0.9, 0.4, 0.4, 1)
+polygon = PackedVector2Array(-8, 0, 8, 0, 5, 35, -5, 35)
+
+[node name="FishIndicator" type="Polygon2D" parent="OpponentClaw/ClawHead"]
+visible = false
+position = Vector2(0, 50)
+color = Color(1, 0.5, 0.3, 0.8)
+polygon = PackedVector2Array(-15, -10, 15, -10, 12, 10, -12, 10)
+
+[node name="NameLabel" type="Label" parent="OpponentClaw"]
+offset_left = -50.0
+offset_top = -130.0
+offset_right = 50.0
+offset_bottom = -110.0
+theme_override_colors/font_color = Color(1, 0.4, 0.4, 1)
+theme_override_font_sizes/font_size = 14
+text = "Opponent"
+horizontal_alignment = 1
+
+[node name="DropZone" type="Area2D" parent="."]
+position = Vector2(600, 300)
+script = ExtResource("4_dropzone")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DropZone"]
+
+[node name="BucketBack" type="Polygon2D" parent="DropZone"]
+color = Color(0.545, 0.353, 0.169, 1)
+polygon = PackedVector2Array(-50, -50, 50, -50, 60, 60, -60, 60)
+
+[node name="BucketWater" type="Polygon2D" parent="DropZone"]
+color = Color(0.392, 0.706, 0.965, 1)
+polygon = PackedVector2Array(-40, -20, 40, -20, 45, 45, -45, 45)
+
+[node name="BucketFront" type="Polygon2D" parent="DropZone"]
+color = Color(0.647, 0.451, 0.263, 1)
+polygon = PackedVector2Array(-55, 40, 55, 40, 60, 60, -60, 60)
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="TopBar" type="Panel" parent="UI"]
+offset_right = 720.0
+offset_bottom = 120.0
+
+[node name="LocalName" type="Label" parent="UI/TopBar"]
+offset_left = 20.0
+offset_top = 10.0
+offset_right = 200.0
+offset_bottom = 40.0
+theme_override_font_sizes/font_size = 18
+text = "YOU"
+
+[node name="LocalScore" type="Label" parent="UI/TopBar"]
+offset_left = 20.0
+offset_top = 40.0
+offset_right = 150.0
+offset_bottom = 100.0
+theme_override_colors/font_color = Color(0.2, 1, 0.4, 1)
+theme_override_font_sizes/font_size = 48
+text = "0"
+
+[node name="Timer" type="Label" parent="UI/TopBar"]
+offset_left = 310.0
+offset_top = 40.0
+offset_right = 410.0
+offset_bottom = 100.0
+theme_override_font_sizes/font_size = 48
+text = "30"
+horizontal_alignment = 1
+
+[node name="TimerLabel" type="Label" parent="UI/TopBar"]
+offset_left = 310.0
+offset_top = 10.0
+offset_right = 410.0
+offset_bottom = 40.0
+theme_override_font_sizes/font_size = 18
+text = "TIME"
+horizontal_alignment = 1
+
+[node name="OpponentName" type="Label" parent="UI/TopBar"]
+offset_left = 520.0
+offset_top = 10.0
+offset_right = 700.0
+offset_bottom = 40.0
+theme_override_font_sizes/font_size = 18
+text = "OPPONENT"
+horizontal_alignment = 2
+
+[node name="OpponentScore" type="Label" parent="UI/TopBar"]
+offset_left = 570.0
+offset_top = 40.0
+offset_right = 700.0
+offset_bottom = 100.0
+theme_override_colors/font_color = Color(1, 0.4, 0.4, 1)
+theme_override_font_sizes/font_size = 48
+text = "0"
+horizontal_alignment = 2
+
+[node name="VSLabel" type="Label" parent="UI"]
+offset_left = 310.0
+offset_top = 160.0
+offset_right = 410.0
+offset_bottom = 200.0
+theme_override_colors/font_color = Color(1, 1, 0, 1)
+theme_override_font_sizes/font_size = 32
+text = "VS"
+horizontal_alignment = 1
+
+[node name="CountdownPanel" type="Panel" parent="UI"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -100.0
+offset_top = -100.0
+offset_right = 100.0
+offset_bottom = 100.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="CountdownLabel" type="Label" parent="UI/CountdownPanel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -50.0
+offset_top = -50.0
+offset_right = 50.0
+offset_bottom = 50.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 72
+text = "3"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="GameOverPanel" type="Panel" parent="UI"]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -150.0
+offset_right = 200.0
+offset_bottom = 150.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ResultLabel" type="Label" parent="UI/GameOverPanel"]
+layout_mode = 1
+offset_left = 20.0
+offset_top = 30.0
+offset_right = 380.0
+offset_bottom = 90.0
+theme_override_font_sizes/font_size = 42
+text = "YOU WIN!"
+horizontal_alignment = 1
+
+[node name="ScoresLabel" type="Label" parent="UI/GameOverPanel"]
+layout_mode = 1
+offset_left = 20.0
+offset_top = 100.0
+offset_right = 380.0
+offset_bottom = 140.0
+theme_override_font_sizes/font_size = 24
+text = "You: 5  -  Opponent: 3"
+horizontal_alignment = 1
+
+[node name="RematchButton" type="Button" parent="UI/GameOverPanel"]
+layout_mode = 1
+offset_left = 50.0
+offset_top = 170.0
+offset_right = 190.0
+offset_bottom = 220.0
+text = "Rematch"
+
+[node name="QuitButton" type="Button" parent="UI/GameOverPanel"]
+layout_mode = 1
+offset_left = 210.0
+offset_top = 170.0
+offset_right = 350.0
+offset_bottom = 220.0
+text = "Quit"
+
+[node name="GameTimer" type="Timer" parent="."]
+wait_time = 1.0

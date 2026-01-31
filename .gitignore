@@ -1,0 +1,30 @@
+# Godot
+.godot/
+*.import
+export_credentials.cfg
+
+# Builds
+builds/
+*.ipa
+*.aab
+*.apk
+
+# macOS
+.DS_Store
+*.swp
+
+# IDE
+.vscode/
+*.code-workspace
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/
+fastlane/test_output/
+
+# Secrets (never commit these)
+*.p8
+*.p12
+*.mobileprovision
+fastlane/api_key.json

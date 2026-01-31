@@ -1,0 +1,78 @@
+default_platform(:ios)
+
+platform :ios do
+  desc "Run tests"
+  lane :test do
+    run_tests(
+      project: "builds/ios/FishCatcher.xcodeproj",
+      scheme: "FishCatcher",
+      devices: ["iPhone 15"],
+      clean: true
+    )
+  end
+
+  desc "Build and upload to App Store Connect"
+  lane :release do
+    # Run tests first
+    test
+
+    # Increment build number automatically
+    increment_build_number(
+      xcodeproj: "builds/ios/FishCatcher.xcodeproj"
+    )
+
+    # Build the app
+    build_app(
+      project: "builds/ios/FishCatcher.xcodeproj",
+      scheme: "FishCatcher",
+      export_method: "app-store",
+      output_directory: "builds/ios",
+      output_name: "FishCatcher.ipa"
+    )
+
+    # Upload to App Store Connect
+    upload_to_app_store(
+      skip_metadata: true,
+      skip_screenshots: true,
+      skip_app_version_update: true,
+      force: true
+    )
+  end
+
+  desc "Build and upload to TestFlight"
+  lane :beta do
+    # Run tests first
+    test
+
+    increment_build_number(
+      xcodeproj: "builds/ios/FishCatcher.xcodeproj"
+    )
+
+    build_app(
+      project: "builds/ios/FishCatcher.xcodeproj",
+      scheme: "FishCatcher",
+      export_method: "app-store",
+      output_directory: "builds/ios",
+      output_name: "FishCatcher.ipa"
+    )
+
+    upload_to_testflight(
+      skip_waiting_for_build_processing: true
+    )
+  end
+
+  desc "Just build (no upload)"
+  lane :build do
+    increment_build_number(
+      xcodeproj: "builds/ios/FishCatcher.xcodeproj"
+    )
+
+    build_app(
+      project: "builds/ios/FishCatcher.xcodeproj",
+      scheme: "FishCatcher",
+      export_method: "app-store",
+      output_directory: "builds/ios",
+      output_name: "FishCatcher.ipa"
+    )
+  end
+end
