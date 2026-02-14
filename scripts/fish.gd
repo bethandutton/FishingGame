@@ -14,16 +14,8 @@ func _ready() -> void:
 	start_x = position.x
 	time_offset = randf() * 10.0  # Random phase offset
 
-	# Use synced values if available (multiplayer), otherwise randomize
-	if has_meta("synced_speed"):
-		swim_speed = get_meta("synced_speed")
-	else:
-		swim_speed = randf_range(50.0, 120.0)
-
-	if has_meta("synced_direction"):
-		swim_direction = get_meta("synced_direction")
-	else:
-		swim_direction = 1 if randf() > 0.5 else -1
+	swim_speed = randf_range(50.0, 120.0)
+	swim_direction = 1 if randf() > 0.5 else -1
 
 func _process(delta: float) -> void:
 	if is_grabbed:

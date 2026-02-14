@@ -13,6 +13,26 @@ builds/
 .DS_Store
 *.swp
 
+# Unity
+FishCatcherUnity/Library/
+FishCatcherUnity/Temp/
+FishCatcherUnity/Obj/
+FishCatcherUnity/Build/
+FishCatcherUnity/Builds/
+FishCatcherUnity/Logs/
+FishCatcherUnity/UserSettings/
+FishCatcherUnity/MemoryCaptures/
+FishCatcherUnity/Recording/
+FishCatcherUnity/*.csproj
+FishCatcherUnity/*.sln
+FishCatcherUnity/*.suo
+FishCatcherUnity/*.user
+FishCatcherUnity/*.pidb
+FishCatcherUnity/*.booproj
+FishCatcherUnity/*.unityproj
+FishCatcherUnity/*.svd
+FishCatcherUnity/*.pdb
+
 # IDE
 .vscode/
 *.code-workspace
@@ -23,8 +43,17 @@ fastlane/Preview.html
 fastlane/screenshots/
 fastlane/test_output/
 
+# Environment variables (local config with real values)
+.env
+
 # Secrets (never commit these)
 *.p8
 *.p12
 *.mobileprovision
 fastlane/api_key.json
+
+# Sensitive configs
+export_presets.cfg
+app_store/
+PUBLISHING_GUIDE.md
+GITHUB_CI_SETUP.md

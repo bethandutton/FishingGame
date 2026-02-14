@@ -22,10 +22,6 @@ boot_splash/stretch_mode=0
 boot_splash/use_filter=false
 config/icon="res://icon.svg"
 
-[autoload]
-
-NetworkManager="*res://scripts/network_manager.gd"
-
 [display]
 
 window/size/viewport_width=720

@@ -156,14 +156,6 @@ offset_bottom = 330.0
 theme_override_font_sizes/font_size = 24
 text = "SINGLE PLAYER"
 
-[node name="MultiplayerButton" type="Button" parent="UI/StartPanel"]
-offset_left = 125.0
-offset_top = 340.0
-offset_right = 375.0
-offset_bottom = 390.0
-theme_override_font_sizes/font_size = 24
-text = "MULTIPLAYER"
-
 [node name="GameOverPanel" type="Panel" parent="UI"]
 visible = false
 offset_left = 110.0

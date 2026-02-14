@@ -3,7 +3,6 @@ extends Control
 ## Home Screen - Main Menu
 
 @onready var single_player_button: Button = $VBoxContainer/SinglePlayerButton
-@onready var multiplayer_button: Button = $VBoxContainer/MultiplayerButton
 @onready var title_label: Label = $TitleLabel
 @onready var fish_container: Node2D = $FishContainer
 
@@ -13,7 +12,6 @@ var fish_speeds: Array = []
 
 func _ready() -> void:
 	single_player_button.pressed.connect(_on_single_player_pressed)
-	multiplayer_button.pressed.connect(_on_multiplayer_pressed)
 
 	# Spawn decorative swimming fish in background
 	_spawn_decorative_fish()
@@ -23,9 +21,6 @@ func _ready() -> void:
 
 func _on_single_player_pressed() -> void:
 	get_tree().change_scene_to_file("res://scenes/main.tscn")
-
-func _on_multiplayer_pressed() -> void:
-	get_tree().change_scene_to_file("res://scenes/lobby.tscn")
 
 func _spawn_decorative_fish() -> void:
 	var fish_colors = [

@@ -20,16 +20,6 @@ var fish_colors: Array[Color] = [
 	Color(0.6, 0.3, 0.8),   # Purple
 ]
 
-# Color name to Color mapping for network sync
-var color_name_map: Dictionary = {
-	"red": Color(1.0, 0.3, 0.3),
-	"orange": Color(1.0, 0.6, 0.2),
-	"yellow": Color(1.0, 0.9, 0.2),
-	"green": Color(0.3, 0.8, 0.3),
-	"blue": Color(0.3, 0.5, 1.0),
-	"purple": Color(0.6, 0.3, 0.8),
-}
-
 func _ready() -> void:
 	# Create fish scene programmatically
 	spawn_initial_fish()
@@ -54,83 +44,6 @@ func spawn_fish(index: int) -> void:
 
 	add_child(fish)
 	active_fish.append(fish)
-
-## Spawn fish from network-synced data (for multiplayer)
-func spawn_from_network_data(fish_data: Array) -> void:
-	# Clear existing fish
-	for fish in active_fish:
-		if is_instance_valid(fish):
-			fish.queue_free()
-	active_fish.clear()
-
-	# Spawn from network data
-	for data in fish_data:
-		var fish = create_fish_node_from_data(data)
-		fish.position = Vector2(data.x, data.y)
-		fish.set_meta("base_y", data.y)
-		fish.set_meta("fish_id", data.id)
-
-		add_child(fish)
-		active_fish.append(fish)
-
-## Create fish node from network data
-func create_fish_node_from_data(data: Dictionary) -> Node2D:
-	var fish = Node2D.new()
-	fish.name = "Fish_" + str(data.id)
-	fish.add_to_group("fish")
-
-	# Add fish script
-	var script = load("res://scripts/fish.gd")
-	fish.set_script(script)
-
-	# Get color from name
-	var color = color_name_map.get(data.color, Color(1.0, 0.3, 0.3))
-
-	# Fish body
-	var body = Polygon2D.new()
-	body.name = "Body"
-	body.color = color
-	body.polygon = create_fish_body_polygon()
-	fish.add_child(body)
-
-	# Fish eye
-	var eye_white = Polygon2D.new()
-	eye_white.name = "EyeWhite"
-	eye_white.color = Color(1, 1, 1)
-	eye_white.polygon = create_circle_polygon(8, 10)
-	eye_white.position = Vector2(5, -8)
-	fish.add_child(eye_white)
-
-	var eye_pupil = Polygon2D.new()
-	eye_pupil.name = "EyePupil"
-	eye_pupil.color = Color(0, 0, 0)
-	eye_pupil.polygon = create_circle_polygon(4, 8)
-	eye_pupil.position = Vector2(7, -8)
-	fish.add_child(eye_pupil)
-
-	# Mouth
-	var mouth = Polygon2D.new()
-	mouth.name = "Mouth"
-	mouth.color = Color(0.15, 0.1, 0.1)
-	mouth.polygon = create_circle_polygon(10, 8)
-	mouth.position = Vector2(0, 12)
-	fish.add_child(mouth)
-
-	# Collision area
-	var area = Area2D.new()
-	area.name = "GrabArea"
-	var collision = CollisionShape2D.new()
-	var shape = CircleShape2D.new()
-	shape.radius = 25.0
-	collision.shape = shape
-	area.add_child(collision)
-	fish.add_child(area)
-
-	# Set synced properties
-	fish.set_meta("synced_speed", data.speed)
-	fish.set_meta("synced_direction", data.direction)
-
-	return fish
 
 func create_fish_node(index: int) -> Node2D:
 	var fish = Node2D.new()
