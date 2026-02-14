@@ -58,8 +58,13 @@ public class SceneBuilder : EditorWindow
 
         // CircleCollider2D for grab detection
         CircleCollider2D col = fish.AddComponent<CircleCollider2D>();
-        col.radius = 0.4f;
+        col.radius = 0.5f;
         col.isTrigger = true;
+
+        // Rigidbody2D (kinematic) for trigger detection with bucket
+        Rigidbody2D rb = fish.AddComponent<Rigidbody2D>();
+        rb.bodyType = RigidbodyType2D.Kinematic;
+        rb.gravityScale = 0f;
 
         // Fish script
         fish.AddComponent<Fish>();
@@ -83,19 +88,19 @@ public class SceneBuilder : EditorWindow
         Camera cam = camObj.AddComponent<Camera>();
         cam.orthographic = true;
         cam.orthographicSize = 8f;
-        cam.backgroundColor = new Color(0.529f, 0.808f, 0.922f); // sky blue
+        cam.backgroundColor = new Color(0.18f, 0.45f, 0.65f);
         cam.clearFlags = CameraClearFlags.SolidColor;
         camObj.transform.position = new Vector3(0, 0, -10);
         camObj.tag = "MainCamera";
 
-        // Water background
+        // Water background (lower portion)
         GameObject water = new GameObject("Water");
         SpriteRenderer waterSr = water.AddComponent<SpriteRenderer>();
-        waterSr.color = new Color(0.2f, 0.5f, 0.7f);
+        waterSr.color = new Color(0.12f, 0.32f, 0.52f);
         waterSr.drawMode = SpriteDrawMode.Tiled;
         waterSr.sortingOrder = -1;
-        water.transform.position = new Vector3(0, -5f, 0);
-        water.transform.localScale = new Vector3(12f, 8f, 1f);
+        water.transform.position = new Vector3(0, -4f, 0);
+        water.transform.localScale = new Vector3(12f, 10f, 1f);
 
         // Fish container
         GameObject fishContainer = new GameObject("FishContainer");
@@ -104,30 +109,89 @@ public class SceneBuilder : EditorWindow
         GameObject canvasObj = new GameObject("Canvas");
         Canvas canvas = canvasObj.AddComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        canvasObj.AddComponent<CanvasScaler>().uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        canvasObj.GetComponent<CanvasScaler>().referenceResolution = new Vector2(720, 1280);
+        CanvasScaler scaler = canvasObj.AddComponent<CanvasScaler>();
+        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(720, 1280);
+        scaler.matchWidthOrHeight = 0.5f;
         canvasObj.AddComponent<GraphicRaycaster>();
 
-        // Title
-        GameObject titleObj = CreateTMPText(canvasObj.transform, "TitleLabel", "FISH\nCATCHER",
-            new Vector2(0, 200), 64, TextAlignmentOptions.Center);
-        TextMeshProUGUI titleTMP = titleObj.GetComponent<TextMeshProUGUI>();
+        // Title - centered upper area
+        GameObject titleObj = new GameObject("TitleLabel");
+        titleObj.transform.SetParent(canvasObj.transform, false);
+        TextMeshProUGUI titleTMP = titleObj.AddComponent<TextMeshProUGUI>();
+        titleTMP.text = "FISH\nCATCHER";
+        titleTMP.fontSize = 80;
+        titleTMP.alignment = TextAlignmentOptions.Center;
         titleTMP.color = Color.white;
         titleTMP.enableWordWrapping = false;
+        titleTMP.fontStyle = FontStyles.Bold;
+        RectTransform titleRT = titleObj.GetComponent<RectTransform>();
+        titleRT.anchorMin = new Vector2(0.5f, 1f);
+        titleRT.anchorMax = new Vector2(0.5f, 1f);
+        titleRT.pivot = new Vector2(0.5f, 1f);
+        titleRT.anchoredPosition = new Vector2(0, -120);
+        titleRT.sizeDelta = new Vector2(600, 220);
 
         // Subtitle
-        CreateTMPText(canvasObj.transform, "Subtitle", "Catch them all!",
-            new Vector2(0, 80), 24, TextAlignmentOptions.Center,
-            new Color(1f, 0.9f, 0.5f));
+        GameObject subtitleObj = new GameObject("Subtitle");
+        subtitleObj.transform.SetParent(canvasObj.transform, false);
+        TextMeshProUGUI subTMP = subtitleObj.AddComponent<TextMeshProUGUI>();
+        subTMP.text = "Catch them all!";
+        subTMP.fontSize = 28;
+        subTMP.alignment = TextAlignmentOptions.Center;
+        subTMP.color = new Color(1f, 0.9f, 0.5f);
+        subTMP.enableWordWrapping = false;
+        RectTransform subRT = subtitleObj.GetComponent<RectTransform>();
+        subRT.anchorMin = new Vector2(0.5f, 0.5f);
+        subRT.anchorMax = new Vector2(0.5f, 0.5f);
+        subRT.anchoredPosition = new Vector2(0, 120);
+        subRT.sizeDelta = new Vector2(400, 50);
 
-        // Play button
-        GameObject playBtn = CreateButton(canvasObj.transform, "PlayButton", "PLAY",
-            new Vector2(0, -50), new Vector2(280, 70), 28);
+        // Play button - large, centered, green for visibility
+        GameObject playBtn = new GameObject("PlayButton");
+        playBtn.transform.SetParent(canvasObj.transform, false);
+        Image playImg = playBtn.AddComponent<Image>();
+        playImg.color = new Color(0.2f, 0.7f, 0.3f);
+        Button playButton = playBtn.AddComponent<Button>();
+        ColorBlock playColors = playButton.colors;
+        playColors.normalColor = new Color(0.2f, 0.7f, 0.3f);
+        playColors.highlightedColor = new Color(0.3f, 0.8f, 0.4f);
+        playColors.pressedColor = new Color(0.15f, 0.55f, 0.25f);
+        playButton.colors = playColors;
+        RectTransform playRT = playBtn.GetComponent<RectTransform>();
+        playRT.anchorMin = new Vector2(0.5f, 0.5f);
+        playRT.anchorMax = new Vector2(0.5f, 0.5f);
+        playRT.anchoredPosition = new Vector2(0, -40);
+        playRT.sizeDelta = new Vector2(400, 110);
 
-        // Version label
-        CreateTMPText(canvasObj.transform, "VersionLabel", "v1.2.0",
-            new Vector2(0, -550), 14, TextAlignmentOptions.Center,
-            new Color(1, 1, 1, 0.5f));
+        // Play button text
+        GameObject playTextObj = new GameObject("Text");
+        playTextObj.transform.SetParent(playBtn.transform, false);
+        TextMeshProUGUI playTMP = playTextObj.AddComponent<TextMeshProUGUI>();
+        playTMP.text = "PLAY";
+        playTMP.fontSize = 42;
+        playTMP.alignment = TextAlignmentOptions.Center;
+        playTMP.color = Color.white;
+        playTMP.fontStyle = FontStyles.Bold;
+        RectTransform playTextRT = playTextObj.GetComponent<RectTransform>();
+        playTextRT.anchorMin = Vector2.zero;
+        playTextRT.anchorMax = Vector2.one;
+        playTextRT.sizeDelta = Vector2.zero;
+
+        // Version label at bottom
+        GameObject versionObj = new GameObject("VersionLabel");
+        versionObj.transform.SetParent(canvasObj.transform, false);
+        TextMeshProUGUI verTMP = versionObj.AddComponent<TextMeshProUGUI>();
+        verTMP.text = "v1.2.0";
+        verTMP.fontSize = 16;
+        verTMP.alignment = TextAlignmentOptions.Center;
+        verTMP.color = new Color(1, 1, 1, 0.4f);
+        RectTransform verRT = versionObj.GetComponent<RectTransform>();
+        verRT.anchorMin = new Vector2(0.5f, 0f);
+        verRT.anchorMax = new Vector2(0.5f, 0f);
+        verRT.pivot = new Vector2(0.5f, 0f);
+        verRT.anchoredPosition = new Vector2(0, 40);
+        verRT.sizeDelta = new Vector2(200, 30);
 
         // HomeScreen script
         GameObject homeManager = new GameObject("HomeScreenManager");
@@ -135,8 +199,8 @@ public class SceneBuilder : EditorWindow
 
         // Wire up references via SerializedObject
         SerializedObject so = new SerializedObject(hs);
-        so.FindProperty("titleLabel").objectReferenceValue = titleObj.GetComponent<TextMeshProUGUI>();
-        so.FindProperty("titleTransform").objectReferenceValue = titleObj.GetComponent<RectTransform>();
+        so.FindProperty("titleLabel").objectReferenceValue = titleTMP;
+        so.FindProperty("titleTransform").objectReferenceValue = titleRT;
         so.FindProperty("fishContainer").objectReferenceValue = fishContainer.transform;
 
         // Set fish prefab if it exists
@@ -147,8 +211,7 @@ public class SceneBuilder : EditorWindow
         so.ApplyModifiedProperties();
 
         // Wire play button click
-        Button btn = playBtn.GetComponent<Button>();
-        UnityEditor.Events.UnityEventTools.AddPersistentListener(btn.onClick,
+        UnityEditor.Events.UnityEventTools.AddPersistentListener(playButton.onClick,
             new UnityEngine.Events.UnityAction(hs.OnPlayPressed));
 
         // EventSystem (required for UI interaction)
@@ -171,43 +234,49 @@ public class SceneBuilder : EditorWindow
         Camera cam = camObj.AddComponent<Camera>();
         cam.orthographic = true;
         cam.orthographicSize = 8f;
-        cam.backgroundColor = new Color(0.15f, 0.25f, 0.4f);
+        cam.backgroundColor = new Color(0.12f, 0.22f, 0.38f);
         cam.clearFlags = CameraClearFlags.SolidColor;
         camObj.transform.position = new Vector3(0, 0, -10);
         camObj.tag = "MainCamera";
 
-        // Water area background
+        // Water area background (fills lower portion of screen)
         GameObject water = new GameObject("WaterArea");
         SpriteRenderer waterSr = water.AddComponent<SpriteRenderer>();
-        waterSr.color = new Color(0.1f, 0.35f, 0.55f);
+        waterSr.color = new Color(0.08f, 0.28f, 0.48f);
         waterSr.sortingOrder = -1;
-        water.transform.position = new Vector3(0, -5f, 0);
-        water.transform.localScale = new Vector3(12f, 8f, 1f);
+        water.transform.position = new Vector3(0, -3f, 0);
+        water.transform.localScale = new Vector3(12f, 14f, 1f);
 
-        // DropZone (bucket)
+        // DropZone (bucket) - positioned at top right where claw returns
         GameObject bucket = new GameObject("DropZone");
-        bucket.transform.position = new Vector3(4f, 4f, 0);
+        bucket.transform.position = new Vector3(2.5f, 6.5f, 0);
+        bucket.transform.localScale = new Vector3(0.8f, 0.8f, 1f);
         SpriteRenderer bucketSr = bucket.AddComponent<SpriteRenderer>();
         bucketSr.sprite = ClawSpriteGenerator.GetBucketSprite();
         bucketSr.sortingOrder = 3;
         BoxCollider2D bucketCol = bucket.AddComponent<BoxCollider2D>();
-        bucketCol.size = new Vector2(1.5f, 1.5f);
+        bucketCol.size = new Vector2(2.5f, 2f);
         bucketCol.isTrigger = true;
+        // Rigidbody2D needed for trigger detection
+        Rigidbody2D bucketRb = bucket.AddComponent<Rigidbody2D>();
+        bucketRb.bodyType = RigidbodyType2D.Kinematic;
+        bucketRb.gravityScale = 0f;
         DropZone dropZone = bucket.AddComponent<DropZone>();
 
-        // "DROP HERE" label
+        // "DROP" label above bucket
         GameObject dropLabel = new GameObject("DropLabel");
         dropLabel.transform.SetParent(bucket.transform);
-        dropLabel.transform.localPosition = new Vector3(0, 1.2f, 0);
+        dropLabel.transform.localPosition = new Vector3(0, 1.5f, 0);
         TextMeshPro dropTMP = dropLabel.AddComponent<TextMeshPro>();
-        dropTMP.text = "DROP HERE";
+        dropTMP.text = "DROP";
         dropTMP.fontSize = 4;
         dropTMP.alignment = TextAlignmentOptions.Center;
+        dropTMP.color = new Color(1f, 0.9f, 0.5f);
         dropTMP.sortingOrder = 10;
 
         // Fish Spawner
         GameObject spawnerObj = new GameObject("FishSpawner");
-        spawnerObj.transform.position = new Vector3(0, -2f, 0);
+        spawnerObj.transform.position = Vector3.zero;
         FishSpawner spawner = spawnerObj.AddComponent<FishSpawner>();
 
         // Set fish prefab reference
@@ -219,15 +288,16 @@ public class SceneBuilder : EditorWindow
             spawnerSo.ApplyModifiedProperties();
         }
 
-        // Claw
+        // Claw - positioned at top of screen
         GameObject clawObj = new GameObject("Claw");
-        clawObj.transform.position = new Vector3(0, 6f, 0);
+        clawObj.transform.position = new Vector3(0, 7f, 0);
         Claw claw = clawObj.AddComponent<Claw>();
 
-        // Claw head
+        // Claw head (scaled down for mobile)
         GameObject clawHead = new GameObject("ClawHead");
         clawHead.transform.SetParent(clawObj.transform);
         clawHead.transform.localPosition = Vector3.zero;
+        clawHead.transform.localScale = new Vector3(0.6f, 0.6f, 1f);
 
         // Claw base sprite
         GameObject clawBase = new GameObject("ClawBase");
@@ -253,19 +323,11 @@ public class SceneBuilder : EditorWindow
         rightSr.sprite = ClawSpriteGenerator.GetClawArmSprite();
         rightSr.sortingOrder = 7;
 
-        // Claw grab area (for collision detection)
-        GameObject grabArea = new GameObject("GrabArea");
-        grabArea.transform.SetParent(clawHead.transform);
-        grabArea.transform.localPosition = new Vector3(0, -0.6f, 0);
-        CircleCollider2D grabCol = grabArea.AddComponent<CircleCollider2D>();
-        grabCol.radius = 0.4f;
-        grabCol.isTrigger = true;
-
         // Rope (LineRenderer)
         LineRenderer rope = clawObj.AddComponent<LineRenderer>();
         rope.positionCount = 2;
-        rope.startWidth = 0.06f;
-        rope.endWidth = 0.06f;
+        rope.startWidth = 0.05f;
+        rope.endWidth = 0.05f;
         rope.material = new Material(Shader.Find("Sprites/Default"));
         rope.startColor = new Color(0.8f, 0.7f, 0.2f);
         rope.endColor = new Color(0.8f, 0.7f, 0.2f);
@@ -284,59 +346,94 @@ public class SceneBuilder : EditorWindow
         GameObject canvasObj = new GameObject("Canvas");
         Canvas canvas = canvasObj.AddComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        CanvasScaler scaler = canvasObj.AddComponent<CanvasScaler>();
-        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(720, 1280);
+        CanvasScaler canvasScaler = canvasObj.AddComponent<CanvasScaler>();
+        canvasScaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        canvasScaler.referenceResolution = new Vector2(720, 1280);
+        canvasScaler.matchWidthOrHeight = 0.5f;
         canvasObj.AddComponent<GraphicRaycaster>();
 
-        // Top bar
-        GameObject topBar = new GameObject("TopBar");
-        topBar.transform.SetParent(canvasObj.transform, false);
-        Image topBarImg = topBar.AddComponent<Image>();
-        topBarImg.color = new Color(0.1f, 0.15f, 0.25f);
-        RectTransform topBarRT = topBar.GetComponent<RectTransform>();
-        topBarRT.anchorMin = new Vector2(0, 1);
-        topBarRT.anchorMax = new Vector2(1, 1);
-        topBarRT.pivot = new Vector2(0.5f, 1);
-        topBarRT.sizeDelta = new Vector2(0, 80);
+        // Score label - anchored top-left with safe area padding
+        GameObject scoreObj = new GameObject("ScoreLabel");
+        scoreObj.transform.SetParent(canvasObj.transform, false);
+        TextMeshProUGUI scoreTMP = scoreObj.AddComponent<TextMeshProUGUI>();
+        scoreTMP.text = "Fish: 0 / 10";
+        scoreTMP.fontSize = 26;
+        scoreTMP.alignment = TextAlignmentOptions.Left;
+        scoreTMP.color = Color.white;
+        scoreTMP.enableWordWrapping = false;
+        RectTransform scoreRT = scoreObj.GetComponent<RectTransform>();
+        scoreRT.anchorMin = new Vector2(0, 1);
+        scoreRT.anchorMax = new Vector2(0, 1);
+        scoreRT.pivot = new Vector2(0, 1);
+        scoreRT.anchoredPosition = new Vector2(20, -70);
+        scoreRT.sizeDelta = new Vector2(300, 50);
 
-        // Score label
-        GameObject scoreObj = CreateTMPText(canvasObj.transform, "ScoreLabel", "Fish: 0 / 10",
-            new Vector2(-170, 590), 28, TextAlignmentOptions.Left);
+        // Timer label - anchored top-right with safe area padding
+        GameObject timerObj = new GameObject("TimerLabel");
+        timerObj.transform.SetParent(canvasObj.transform, false);
+        TextMeshProUGUI timerTMP = timerObj.AddComponent<TextMeshProUGUI>();
+        timerTMP.text = "Time: 30";
+        timerTMP.fontSize = 26;
+        timerTMP.alignment = TextAlignmentOptions.Right;
+        timerTMP.color = Color.white;
+        timerTMP.enableWordWrapping = false;
+        RectTransform timerRT = timerObj.GetComponent<RectTransform>();
+        timerRT.anchorMin = new Vector2(1, 1);
+        timerRT.anchorMax = new Vector2(1, 1);
+        timerRT.pivot = new Vector2(1, 1);
+        timerRT.anchoredPosition = new Vector2(-80, -70);
+        timerRT.sizeDelta = new Vector2(200, 50);
 
-        // Timer label
-        GameObject timerObj = CreateTMPText(canvasObj.transform, "TimerLabel", "Time: 30",
-            new Vector2(170, 590), 28, TextAlignmentOptions.Right);
+        // Pause button - anchored top-right
+        GameObject pauseBtn = new GameObject("PauseButton");
+        pauseBtn.transform.SetParent(canvasObj.transform, false);
+        Image pauseImg = pauseBtn.AddComponent<Image>();
+        pauseImg.color = new Color(0.3f, 0.5f, 0.8f, 0.8f);
+        Button pauseBtnComp = pauseBtn.AddComponent<Button>();
+        RectTransform pauseRT = pauseBtn.GetComponent<RectTransform>();
+        pauseRT.anchorMin = new Vector2(1, 1);
+        pauseRT.anchorMax = new Vector2(1, 1);
+        pauseRT.pivot = new Vector2(1, 1);
+        pauseRT.anchoredPosition = new Vector2(-20, -60);
+        pauseRT.sizeDelta = new Vector2(60, 60);
 
-        // Pause button (overlays timer area)
-        GameObject pauseBtn = CreateButton(canvasObj.transform, "PauseButton", "||",
-            new Vector2(300, 590), new Vector2(60, 50), 20);
+        GameObject pauseText = new GameObject("Text");
+        pauseText.transform.SetParent(pauseBtn.transform, false);
+        TextMeshProUGUI pauseTMP = pauseText.AddComponent<TextMeshProUGUI>();
+        pauseTMP.text = "||";
+        pauseTMP.fontSize = 22;
+        pauseTMP.alignment = TextAlignmentOptions.Center;
+        pauseTMP.color = Color.white;
+        RectTransform pauseTextRT = pauseText.GetComponent<RectTransform>();
+        pauseTextRT.anchorMin = Vector2.zero;
+        pauseTextRT.anchorMax = Vector2.one;
+        pauseTextRT.sizeDelta = Vector2.zero;
 
         // Game Over Panel
-        GameObject gameOverPanel = CreatePanel(canvasObj.transform, "GameOverPanel", new Vector2(500, 400));
+        GameObject gameOverPanel = CreatePanel(canvasObj.transform, "GameOverPanel", new Vector2(550, 450));
         gameOverPanel.SetActive(false);
         CreateTMPText(gameOverPanel.transform, "GameOverLabel", "GAME OVER",
-            new Vector2(0, 130), 42, TextAlignmentOptions.Center);
+            new Vector2(0, 150), 42, TextAlignmentOptions.Center);
         GameObject resultObj = CreateTMPText(gameOverPanel.transform, "ResultLabel", "You caught 0 fish!",
-            new Vector2(0, 40), 28, TextAlignmentOptions.Center);
+            new Vector2(0, 70), 28, TextAlignmentOptions.Center);
         GameObject winLoseObj = CreateTMPText(gameOverPanel.transform, "WinLoseLabel", "TRY AGAIN!",
-            new Vector2(0, -30), 32, TextAlignmentOptions.Center);
+            new Vector2(0, 10), 32, TextAlignmentOptions.Center);
         GameObject restartBtn = CreateButton(gameOverPanel.transform, "RestartButton", "PLAY AGAIN",
-            new Vector2(0, -110), new Vector2(250, 50), 24);
+            new Vector2(0, -80), new Vector2(320, 70), 28);
         GameObject homeBtn = CreateButton(gameOverPanel.transform, "HomeButton", "HOME",
-            new Vector2(0, -170), new Vector2(250, 50), 24);
+            new Vector2(0, -165), new Vector2(320, 70), 28);
 
         // Pause Panel
-        GameObject pausePanel = CreatePanel(canvasObj.transform, "PausePanel", new Vector2(500, 360));
+        GameObject pausePanel = CreatePanel(canvasObj.transform, "PausePanel", new Vector2(550, 420));
         pausePanel.SetActive(false);
         CreateTMPText(pausePanel.transform, "PausedLabel", "PAUSED",
-            new Vector2(0, 120), 48, TextAlignmentOptions.Center);
+            new Vector2(0, 140), 48, TextAlignmentOptions.Center);
         GameObject resumeBtn = CreateButton(pausePanel.transform, "ResumeButton", "RESUME",
-            new Vector2(0, 30), new Vector2(250, 60), 28);
+            new Vector2(0, 40), new Vector2(320, 70), 28);
         GameObject restartPauseBtn = CreateButton(pausePanel.transform, "RestartPauseButton", "RESTART",
-            new Vector2(0, -50), new Vector2(250, 60), 28);
+            new Vector2(0, -50), new Vector2(320, 70), 28);
         GameObject homePauseBtn = CreateButton(pausePanel.transform, "HomePauseButton", "HOME",
-            new Vector2(0, -130), new Vector2(250, 60), 28);
+            new Vector2(0, -140), new Vector2(320, 70), 28);
 
         // GameManager
         GameObject gmObj = new GameObject("GameManager");
@@ -344,8 +441,8 @@ public class SceneBuilder : EditorWindow
 
         // Wire GameManager references
         SerializedObject gmSo = new SerializedObject(gm);
-        gmSo.FindProperty("scoreLabel").objectReferenceValue = scoreObj.GetComponent<TextMeshProUGUI>();
-        gmSo.FindProperty("timerLabel").objectReferenceValue = timerObj.GetComponent<TextMeshProUGUI>();
+        gmSo.FindProperty("scoreLabel").objectReferenceValue = scoreTMP;
+        gmSo.FindProperty("timerLabel").objectReferenceValue = timerTMP;
         gmSo.FindProperty("gameOverPanel").objectReferenceValue = gameOverPanel;
         gmSo.FindProperty("resultLabel").objectReferenceValue = resultObj.GetComponent<TextMeshProUGUI>();
         gmSo.FindProperty("winLoseLabel").objectReferenceValue = winLoseObj.GetComponent<TextMeshProUGUI>();
@@ -353,6 +450,11 @@ public class SceneBuilder : EditorWindow
         gmSo.FindProperty("claw").objectReferenceValue = claw;
         gmSo.FindProperty("fishSpawner").objectReferenceValue = spawner;
         gmSo.ApplyModifiedProperties();
+
+        // Wire Claw's GameManager reference
+        clawSo = new SerializedObject(claw);
+        clawSo.FindProperty("gameManager").objectReferenceValue = gm;
+        clawSo.ApplyModifiedProperties();
 
         // Wire DropZone references
         SerializedObject dzSo = new SerializedObject(dropZone);

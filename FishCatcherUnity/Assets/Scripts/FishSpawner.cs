@@ -8,10 +8,11 @@ public class FishSpawner : MonoBehaviour
     [SerializeField] private GameObject fishPrefab;
 
     [Header("Spawn Area (world units)")]
-    [SerializeField] private float spawnWidth = 8f;
-    [SerializeField] private float spawnHeight = 3f;
-    [SerializeField] private float spawnOriginX = -4f;
-    [SerializeField] private float spawnOriginY = -3f;
+    [SerializeField] private float spawnWidth = 6f;
+    [SerializeField] private float spawnHeight = 5f;
+    [SerializeField] private float spawnOriginX = -3f;
+    [SerializeField] private float spawnOriginY = -1f;
+    [SerializeField] private float fishScale = 0.35f;
 
     private static readonly Color[] FishColors = new Color[]
     {
@@ -46,6 +47,7 @@ public class FishSpawner : MonoBehaviour
         float baseY = spawnOriginY - row * (spawnHeight / 3f) + Random.Range(-0.15f, 0.15f);
 
         GameObject fishObj = Instantiate(fishPrefab, new Vector3(baseX, baseY, 0), Quaternion.identity, transform);
+        fishObj.transform.localScale = Vector3.one * fishScale;
         fishObj.name = $"Fish_{fishIdCounter++}";
 
         Fish fish = fishObj.GetComponent<Fish>();

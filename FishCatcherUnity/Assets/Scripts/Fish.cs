@@ -3,13 +3,13 @@ using UnityEngine;
 public class Fish : MonoBehaviour
 {
     [Header("Movement")]
-    [SerializeField] private float swimRange = 1f;
+    [SerializeField] private float leftBound = -4.5f;
+    [SerializeField] private float rightBound = 4.5f;
 
     public bool IsGrabbed { get; private set; }
 
     private float swimSpeed;
     private int swimDirection;
-    private float startX;
     private float baseY;
     private float timeOffset;
     private SpriteRenderer spriteRenderer;
@@ -17,9 +17,8 @@ public class Fish : MonoBehaviour
     public void Initialize(Color color, float y)
     {
         baseY = y;
-        startX = transform.position.x;
         timeOffset = Random.Range(0f, 10f);
-        swimSpeed = Random.Range(0.8f, 2f);
+        swimSpeed = Random.Range(0.6f, 1.5f);
         swimDirection = Random.value > 0.5f ? 1 : -1;
 
         spriteRenderer = GetComponentInChildren<SpriteRenderer>();
@@ -40,13 +39,13 @@ public class Fish : MonoBehaviour
         Vector3 pos = transform.position;
         pos.x += swimDirection * swimSpeed * Time.deltaTime;
 
-        // Reverse at boundaries
-        if (pos.x > startX + swimRange)
+        // Reverse at screen edges (fish swim across the whole screen)
+        if (pos.x > rightBound)
         {
             swimDirection = -1;
             FlipFish(-1);
         }
-        else if (pos.x < startX - swimRange)
+        else if (pos.x < leftBound)
         {
             swimDirection = 1;
             FlipFish(1);
@@ -75,7 +74,7 @@ public class Fish : MonoBehaviour
     public void Release()
     {
         IsGrabbed = false;
-        startX = transform.position.x;
+        baseY = transform.position.y;
     }
 
     private System.Collections.IEnumerator WiggleAnimation()

@@ -3,18 +3,19 @@ using UnityEngine;
 public class Claw : MonoBehaviour
 {
     [Header("Movement Settings")]
-    [SerializeField] private float dropSpeed = 8f;
-    [SerializeField] private float raiseSpeed = 6f;
-    [SerializeField] private float minX = -4.5f;
-    [SerializeField] private float maxX = 4.5f;
+    [SerializeField] private float dropSpeed = 10f;
+    [SerializeField] private float raiseSpeed = 8f;
+    [SerializeField] private float minX = -3.2f;
+    [SerializeField] private float maxX = 3.2f;
     [SerializeField] private float minY = 0f;
-    [SerializeField] private float maxY = -7f;
+    [SerializeField] private float maxY = -13f;
 
     [Header("References")]
     [SerializeField] private Transform clawHead;
     [SerializeField] private LineRenderer rope;
     [SerializeField] private Transform clawLeft;
     [SerializeField] private Transform clawRight;
+    [SerializeField] private GameManager gameManager;
 
     private enum ClawState { IDLE, HOLDING }
     private ClawState currentState = ClawState.IDLE;
@@ -93,7 +94,7 @@ public class Claw : MonoBehaviour
         if (Input.GetMouseButton(0) && isTouching)
         {
             float mouseX = Input.GetAxis("Mouse X");
-            transform.position += new Vector3(mouseX * 0.5f, 0, 0);
+            transform.position += new Vector3(mouseX * 0.3f, 0, 0);
             ClampPosition();
         }
     }
@@ -118,16 +119,36 @@ public class Claw : MonoBehaviour
             // Move claw head up
             clawHeadLocalY += raiseSpeed * Time.deltaTime;
 
+            // Check for bucket while rising with a fish
+            if (grabbedFish != null)
+            {
+                Collider2D[] hits = Physics2D.OverlapCircleAll(clawHead.position, 1.5f);
+                foreach (var hit in hits)
+                {
+                    DropZone dz = hit.GetComponent<DropZone>();
+                    if (dz != null)
+                    {
+                        Destroy(grabbedFish.gameObject);
+                        grabbedFish = null;
+                        if (gameManager != null) gameManager.OnFishDropped();
+                        currentState = ClawState.IDLE;
+                        OpenClaw();
+                        break;
+                    }
+                }
+            }
+
             if (clawHeadLocalY >= 0f)
             {
                 clawHeadLocalY = 0f;
                 if (grabbedFish != null)
-                    currentState = ClawState.HOLDING;
-                else
                 {
-                    currentState = ClawState.IDLE;
-                    OpenClaw();
+                    // Reached top without hitting bucket - release fish
+                    grabbedFish.Release();
+                    grabbedFish = null;
                 }
+                currentState = ClawState.IDLE;
+                OpenClaw();
             }
         }
 
@@ -137,7 +158,7 @@ public class Claw : MonoBehaviour
     private void UpdateRope()
     {
         if (rope == null) return;
-        rope.SetPosition(0, new Vector3(0, 2f, 0)); // top anchor (local)
+        rope.SetPosition(0, new Vector3(0, 1.5f, 0)); // top anchor (local)
         rope.SetPosition(1, clawHead.localPosition);
     }
 
