@@ -89,6 +89,11 @@ public class GameManager : MonoBehaviour
         timeRemaining += BONUS_TIME;
         UpdateUI();
 
+        // Haptic feedback on catch
+#if UNITY_IOS
+        Handheld.Vibrate();
+#endif
+
         if (score >= TARGET_FISH)
             EndGame();
     }
