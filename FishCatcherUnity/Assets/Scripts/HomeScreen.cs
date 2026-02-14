@@ -15,6 +15,7 @@ public class HomeScreen : MonoBehaviour
     [SerializeField] private int decorativeFishCount = 8;
 
     private float[] fishSpeeds;
+    private float[] fishBaseY;
     private Transform[] fishTransforms;
 
     private static readonly Color[] FishColors = new Color[]
@@ -53,22 +54,34 @@ public class HomeScreen : MonoBehaviour
         if (fishPrefab == null || fishContainer == null) return;
 
         fishSpeeds = new float[decorativeFishCount];
+        fishBaseY = new float[decorativeFishCount];
         fishTransforms = new Transform[decorativeFishCount];
 
         for (int i = 0; i < decorativeFishCount; i++)
         {
-            float x = Random.Range(-4f, 4f);
-            float y = Random.Range(-5f, -2f);
+            float x = Random.Range(-6f, 6f);
+            float y = Random.Range(-7f, -3f);
 
             GameObject fish = Instantiate(fishPrefab, new Vector3(x, y, 0), Quaternion.identity, fishContainer);
-            fish.transform.localScale = Vector3.one * 0.8f;
+            fish.transform.localScale = Vector3.one * 0.4f;
+
+            // Disable the Fish script so it doesn't interfere
+            Fish fishScript = fish.GetComponent<Fish>();
+            if (fishScript != null) fishScript.enabled = false;
 
             SpriteRenderer sr = fish.GetComponentInChildren<SpriteRenderer>();
             if (sr != null)
                 sr.color = FishColors[i % FishColors.Length];
 
             fishTransforms[i] = fish.transform;
-            fishSpeeds[i] = Random.Range(0.5f, 1.3f) * (Random.value > 0.5f ? 1 : -1);
+            fishBaseY[i] = y;
+            float speed = Random.Range(0.5f, 1.3f);
+            fishSpeeds[i] = Random.value > 0.5f ? speed : -speed;
+
+            // Face swim direction
+            Vector3 s = fish.transform.localScale;
+            s.x = Mathf.Abs(s.x) * (fishSpeeds[i] > 0 ? 1 : -1);
+            fish.transform.localScale = s;
         }
     }
 
@@ -84,24 +97,20 @@ public class HomeScreen : MonoBehaviour
             Vector3 pos = fishTransforms[i].position;
             pos.x += fishSpeeds[i] * Time.deltaTime;
 
-            // Reverse at edges
-            if (pos.x > 5f)
+            // Wrap around edges - reappear on the other side at a new depth
+            if (pos.x > 6f)
             {
-                fishSpeeds[i] = -Mathf.Abs(fishSpeeds[i]);
-                Vector3 s = fishTransforms[i].localScale;
-                s.x = -Mathf.Abs(s.x);
-                fishTransforms[i].localScale = s;
+                pos.x = -6f;
+                fishBaseY[i] = Random.Range(-7f, -3f);
             }
-            else if (pos.x < -5f)
+            else if (pos.x < -6f)
             {
-                fishSpeeds[i] = Mathf.Abs(fishSpeeds[i]);
-                Vector3 s = fishTransforms[i].localScale;
-                s.x = Mathf.Abs(s.x);
-                fishTransforms[i].localScale = s;
+                pos.x = 6f;
+                fishBaseY[i] = Random.Range(-7f, -3f);
             }
 
-            // Bobbing
-            pos.y += Mathf.Sin(Time.time * 2f + i) * 0.002f;
+            // Gentle bobbing
+            pos.y = fishBaseY[i] + Mathf.Sin(Time.time * 2f + i) * 0.1f;
             fishTransforms[i].position = pos;
         }
 

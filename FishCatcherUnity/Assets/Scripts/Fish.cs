@@ -3,8 +3,9 @@ using UnityEngine;
 public class Fish : MonoBehaviour
 {
     [Header("Movement")]
-    [SerializeField] private float leftBound = -4.5f;
-    [SerializeField] private float rightBound = 4.5f;
+    [SerializeField] private float screenEdge = 5f;
+    [SerializeField] private float minY = -6f;
+    [SerializeField] private float maxY = -1f;
 
     public bool IsGrabbed { get; private set; }
 
@@ -39,20 +40,22 @@ public class Fish : MonoBehaviour
         Vector3 pos = transform.position;
         pos.x += swimDirection * swimSpeed * Time.deltaTime;
 
-        // Reverse at screen edges (fish swim across the whole screen)
-        if (pos.x > rightBound)
+        // Wrap around screen edges - reappear on the other side at a new depth
+        if (pos.x > screenEdge)
         {
-            swimDirection = -1;
-            FlipFish(-1);
+            pos.x = -screenEdge;
+            baseY = Random.Range(minY, maxY);
+            swimSpeed = Random.Range(0.6f, 1.5f);
         }
-        else if (pos.x < leftBound)
+        else if (pos.x < -screenEdge)
         {
-            swimDirection = 1;
-            FlipFish(1);
+            pos.x = screenEdge;
+            baseY = Random.Range(minY, maxY);
+            swimSpeed = Random.Range(0.6f, 1.5f);
         }
 
-        // Vertical bobbing
-        pos.y = baseY + Mathf.Sin(time * 2f) * 0.08f;
+        // Gentle vertical bobbing
+        pos.y = baseY + Mathf.Sin(time * 2f) * 0.1f;
 
         transform.position = pos;
     }
@@ -67,23 +70,14 @@ public class Fish : MonoBehaviour
     public void Grab()
     {
         IsGrabbed = true;
-        // Wiggle animation
-        StartCoroutine(WiggleAnimation());
+        // Fish hangs vertically from the hook (head up, tail down)
+        transform.rotation = Quaternion.Euler(0, 0, -90f);
     }
 
     public void Release()
     {
         IsGrabbed = false;
-        baseY = transform.position.y;
-    }
-
-    private System.Collections.IEnumerator WiggleAnimation()
-    {
-        float duration = 0.1f;
-        transform.rotation = Quaternion.Euler(0, 0, 12f);
-        yield return new WaitForSeconds(duration);
-        transform.rotation = Quaternion.Euler(0, 0, -12f);
-        yield return new WaitForSeconds(duration);
         transform.rotation = Quaternion.identity;
+        baseY = transform.position.y;
     }
 }

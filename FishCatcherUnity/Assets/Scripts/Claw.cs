@@ -165,27 +165,42 @@ public class Claw : MonoBehaviour
     private void UpdateGrabbedFish()
     {
         if (grabbedFish != null)
-            grabbedFish.transform.position = clawHead.position;
+            grabbedFish.transform.position = clawHead.position + Vector3.down * 0.3f;
     }
 
     private void TryGrabFish()
     {
-        Collider2D[] hits = Physics2D.OverlapCircleAll(clawHead.position, 0.4f);
+        // Search below the claw head where the hook tip is
+        Vector3 grabPoint = clawHead.position + Vector3.down * 0.4f;
+        Collider2D[] hits = Physics2D.OverlapCircleAll(grabPoint, 0.8f);
+        float closestDist = float.MaxValue;
+        Fish closestFish = null;
+
         foreach (var hit in hits)
         {
             Fish fish = hit.GetComponentInParent<Fish>();
             if (fish != null && !fish.IsGrabbed)
             {
-                GrabFish(fish);
-                break;
+                float dist = Vector2.Distance(grabPoint, fish.transform.position);
+                if (dist < closestDist)
+                {
+                    closestDist = dist;
+                    closestFish = fish;
+                }
             }
         }
+
+        if (closestFish != null)
+            GrabFish(closestFish);
     }
 
     private void GrabFish(Fish fish)
     {
         grabbedFish = fish;
         fish.Grab();
+        // Bring fish in front of everything so it's visible
+        SpriteRenderer sr = fish.GetComponentInChildren<SpriteRenderer>();
+        if (sr != null) sr.sortingOrder = 12;
         CloseClaw();
     }
 

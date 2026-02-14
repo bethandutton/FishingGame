@@ -6,7 +6,8 @@ using TMPro;
 public class GameManager : MonoBehaviour
 {
     public const int TARGET_FISH = 10;
-    public const int GAME_TIME = 30;
+    public const int GAME_TIME = 10;
+    public const float BONUS_TIME = 2f;
 
     [Header("UI References")]
     [SerializeField] private TextMeshProUGUI scoreLabel;
@@ -85,6 +86,7 @@ public class GameManager : MonoBehaviour
         if (!gameActive || isPaused) return;
 
         score++;
+        timeRemaining += BONUS_TIME;
         UpdateUI();
 
         if (score >= TARGET_FISH)
@@ -93,7 +95,7 @@ public class GameManager : MonoBehaviour
 
     private void UpdateUI()
     {
-        scoreLabel.text = $"Fish: {score} / {TARGET_FISH}";
+        scoreLabel.text = $"{score}";
         timerLabel.text = $"Time: {Mathf.CeilToInt(timeRemaining)}";
     }
 

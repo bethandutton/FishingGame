@@ -19,6 +19,15 @@ public class SceneBuilder : EditorWindow
         GetWindow<SceneBuilder>("Scene Builder");
     }
 
+    [MenuItem("Window/Fish Catcher/Build All Now")]
+    public static void BuildAllDirect()
+    {
+        BuildFishPrefab();
+        BuildHomeScreenScene();
+        BuildGameScene();
+        Debug.Log("All scenes built successfully!");
+    }
+
     private void OnGUI()
     {
         GUILayout.Label("Fish Catcher Scene Builder", EditorStyles.boldLabel);
@@ -147,36 +156,14 @@ public class SceneBuilder : EditorWindow
         subRT.anchoredPosition = new Vector2(0, 120);
         subRT.sizeDelta = new Vector2(400, 50);
 
-        // Play button - large, centered, green for visibility
-        GameObject playBtn = new GameObject("PlayButton");
-        playBtn.transform.SetParent(canvasObj.transform, false);
-        Image playImg = playBtn.AddComponent<Image>();
-        playImg.color = new Color(0.2f, 0.7f, 0.3f);
-        Button playButton = playBtn.AddComponent<Button>();
-        ColorBlock playColors = playButton.colors;
-        playColors.normalColor = new Color(0.2f, 0.7f, 0.3f);
-        playColors.highlightedColor = new Color(0.3f, 0.8f, 0.4f);
-        playColors.pressedColor = new Color(0.15f, 0.55f, 0.25f);
-        playButton.colors = playColors;
+        // Play button - large, centered, green, rounded
+        GameObject playBtn = CreateButton(canvasObj.transform, "PlayButton", "PLAY",
+            new Vector2(0, -40), new Vector2(400, 110), 42,
+            new Color(0.2f, 0.75f, 0.35f));
         RectTransform playRT = playBtn.GetComponent<RectTransform>();
         playRT.anchorMin = new Vector2(0.5f, 0.5f);
         playRT.anchorMax = new Vector2(0.5f, 0.5f);
-        playRT.anchoredPosition = new Vector2(0, -40);
-        playRT.sizeDelta = new Vector2(400, 110);
-
-        // Play button text
-        GameObject playTextObj = new GameObject("Text");
-        playTextObj.transform.SetParent(playBtn.transform, false);
-        TextMeshProUGUI playTMP = playTextObj.AddComponent<TextMeshProUGUI>();
-        playTMP.text = "PLAY";
-        playTMP.fontSize = 42;
-        playTMP.alignment = TextAlignmentOptions.Center;
-        playTMP.color = Color.white;
-        playTMP.fontStyle = FontStyles.Bold;
-        RectTransform playTextRT = playTextObj.GetComponent<RectTransform>();
-        playTextRT.anchorMin = Vector2.zero;
-        playTextRT.anchorMax = Vector2.one;
-        playTextRT.sizeDelta = Vector2.zero;
+        Button playButton = playBtn.GetComponent<Button>();
 
         // Version label at bottom
         GameObject versionObj = new GameObject("VersionLabel");
@@ -229,14 +216,14 @@ public class SceneBuilder : EditorWindow
     {
         var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
-        // Camera
+        // Camera - shifted up so claw at top is clearly visible
         GameObject camObj = new GameObject("Main Camera");
         Camera cam = camObj.AddComponent<Camera>();
         cam.orthographic = true;
         cam.orthographicSize = 8f;
         cam.backgroundColor = new Color(0.12f, 0.22f, 0.38f);
         cam.clearFlags = CameraClearFlags.SolidColor;
-        camObj.transform.position = new Vector3(0, 0, -10);
+        camObj.transform.position = new Vector3(0, 2f, -10);
         camObj.tag = "MainCamera";
 
         // Water area background (fills lower portion of screen)
@@ -244,12 +231,12 @@ public class SceneBuilder : EditorWindow
         SpriteRenderer waterSr = water.AddComponent<SpriteRenderer>();
         waterSr.color = new Color(0.08f, 0.28f, 0.48f);
         waterSr.sortingOrder = -1;
-        water.transform.position = new Vector3(0, -3f, 0);
-        water.transform.localScale = new Vector3(12f, 14f, 1f);
+        water.transform.position = new Vector3(0, -2f, 0);
+        water.transform.localScale = new Vector3(12f, 16f, 1f);
 
-        // DropZone (bucket) - positioned at top right where claw returns
+        // DropZone (bucket) - positioned clearly below claw start
         GameObject bucket = new GameObject("DropZone");
-        bucket.transform.position = new Vector3(2.5f, 6.5f, 0);
+        bucket.transform.position = new Vector3(2.5f, 5f, 0);
         bucket.transform.localScale = new Vector3(0.8f, 0.8f, 1f);
         SpriteRenderer bucketSr = bucket.AddComponent<SpriteRenderer>();
         bucketSr.sprite = ClawSpriteGenerator.GetBucketSprite();
@@ -288,40 +275,33 @@ public class SceneBuilder : EditorWindow
             spawnerSo.ApplyModifiedProperties();
         }
 
-        // Claw - positioned at top of screen
+        // Claw - positioned at very top of screen
         GameObject clawObj = new GameObject("Claw");
-        clawObj.transform.position = new Vector3(0, 7f, 0);
+        clawObj.transform.position = new Vector3(0, 8f, 0);
         Claw claw = clawObj.AddComponent<Claw>();
 
-        // Claw head (scaled down for mobile)
+        // Hook head
         GameObject clawHead = new GameObject("ClawHead");
         clawHead.transform.SetParent(clawObj.transform);
         clawHead.transform.localPosition = Vector3.zero;
-        clawHead.transform.localScale = new Vector3(0.6f, 0.6f, 1f);
+        clawHead.transform.localScale = new Vector3(0.5f, 0.5f, 1f);
 
-        // Claw base sprite
-        GameObject clawBase = new GameObject("ClawBase");
-        clawBase.transform.SetParent(clawHead.transform);
-        clawBase.transform.localPosition = Vector3.zero;
-        SpriteRenderer baseSr = clawBase.AddComponent<SpriteRenderer>();
-        baseSr.sprite = ClawSpriteGenerator.GetClawBaseSprite();
-        baseSr.sortingOrder = 8;
+        // Hook sprite
+        GameObject hookSprite = new GameObject("HookSprite");
+        hookSprite.transform.SetParent(clawHead.transform);
+        hookSprite.transform.localPosition = Vector3.zero;
+        SpriteRenderer hookSr = hookSprite.AddComponent<SpriteRenderer>();
+        hookSr.sprite = ClawSpriteGenerator.GetHookSprite();
+        hookSr.sortingOrder = 8;
 
-        // Claw left arm
+        // Placeholder left/right (not visible, needed for Claw script references)
         GameObject clawLeft = new GameObject("ClawLeft");
         clawLeft.transform.SetParent(clawHead.transform);
-        clawLeft.transform.localPosition = new Vector3(-0.25f, -0.4f, 0);
-        SpriteRenderer leftSr = clawLeft.AddComponent<SpriteRenderer>();
-        leftSr.sprite = ClawSpriteGenerator.GetClawArmSprite();
-        leftSr.sortingOrder = 7;
+        clawLeft.transform.localPosition = Vector3.zero;
 
-        // Claw right arm
         GameObject clawRight = new GameObject("ClawRight");
         clawRight.transform.SetParent(clawHead.transform);
-        clawRight.transform.localPosition = new Vector3(0.25f, -0.4f, 0);
-        SpriteRenderer rightSr = clawRight.AddComponent<SpriteRenderer>();
-        rightSr.sprite = ClawSpriteGenerator.GetClawArmSprite();
-        rightSr.sortingOrder = 7;
+        clawRight.transform.localPosition = Vector3.zero;
 
         // Rope (LineRenderer)
         LineRenderer rope = clawObj.AddComponent<LineRenderer>();
@@ -384,30 +364,15 @@ public class SceneBuilder : EditorWindow
         timerRT.anchoredPosition = new Vector2(-80, -70);
         timerRT.sizeDelta = new Vector2(200, 50);
 
-        // Pause button - anchored top-right
-        GameObject pauseBtn = new GameObject("PauseButton");
-        pauseBtn.transform.SetParent(canvasObj.transform, false);
-        Image pauseImg = pauseBtn.AddComponent<Image>();
-        pauseImg.color = new Color(0.3f, 0.5f, 0.8f, 0.8f);
-        Button pauseBtnComp = pauseBtn.AddComponent<Button>();
+        // Pause button - anchored top-right, rounded
+        GameObject pauseBtn = CreateButton(canvasObj.transform, "PauseButton", "||",
+            Vector2.zero, new Vector2(60, 60), 22,
+            new Color(0.3f, 0.5f, 0.8f, 0.8f));
         RectTransform pauseRT = pauseBtn.GetComponent<RectTransform>();
         pauseRT.anchorMin = new Vector2(1, 1);
         pauseRT.anchorMax = new Vector2(1, 1);
         pauseRT.pivot = new Vector2(1, 1);
         pauseRT.anchoredPosition = new Vector2(-20, -60);
-        pauseRT.sizeDelta = new Vector2(60, 60);
-
-        GameObject pauseText = new GameObject("Text");
-        pauseText.transform.SetParent(pauseBtn.transform, false);
-        TextMeshProUGUI pauseTMP = pauseText.AddComponent<TextMeshProUGUI>();
-        pauseTMP.text = "||";
-        pauseTMP.fontSize = 22;
-        pauseTMP.alignment = TextAlignmentOptions.Center;
-        pauseTMP.color = Color.white;
-        RectTransform pauseTextRT = pauseText.GetComponent<RectTransform>();
-        pauseTextRT.anchorMin = Vector2.zero;
-        pauseTextRT.anchorMax = Vector2.one;
-        pauseTextRT.sizeDelta = Vector2.zero;
 
         // Game Over Panel
         GameObject gameOverPanel = CreatePanel(canvasObj.transform, "GameOverPanel", new Vector2(550, 450));
@@ -419,9 +384,11 @@ public class SceneBuilder : EditorWindow
         GameObject winLoseObj = CreateTMPText(gameOverPanel.transform, "WinLoseLabel", "TRY AGAIN!",
             new Vector2(0, 10), 32, TextAlignmentOptions.Center);
         GameObject restartBtn = CreateButton(gameOverPanel.transform, "RestartButton", "PLAY AGAIN",
-            new Vector2(0, -80), new Vector2(320, 70), 28);
+            new Vector2(0, -80), new Vector2(320, 70), 28,
+            new Color(0.2f, 0.75f, 0.35f));
         GameObject homeBtn = CreateButton(gameOverPanel.transform, "HomeButton", "HOME",
-            new Vector2(0, -165), new Vector2(320, 70), 28);
+            new Vector2(0, -165), new Vector2(320, 70), 28,
+            new Color(0.4f, 0.45f, 0.55f));
 
         // Pause Panel
         GameObject pausePanel = CreatePanel(canvasObj.transform, "PausePanel", new Vector2(550, 420));
@@ -429,11 +396,14 @@ public class SceneBuilder : EditorWindow
         CreateTMPText(pausePanel.transform, "PausedLabel", "PAUSED",
             new Vector2(0, 140), 48, TextAlignmentOptions.Center);
         GameObject resumeBtn = CreateButton(pausePanel.transform, "ResumeButton", "RESUME",
-            new Vector2(0, 40), new Vector2(320, 70), 28);
+            new Vector2(0, 40), new Vector2(320, 70), 28,
+            new Color(0.2f, 0.75f, 0.35f));
         GameObject restartPauseBtn = CreateButton(pausePanel.transform, "RestartPauseButton", "RESTART",
-            new Vector2(0, -50), new Vector2(320, 70), 28);
+            new Vector2(0, -50), new Vector2(320, 70), 28,
+            new Color(0.25f, 0.5f, 0.85f));
         GameObject homePauseBtn = CreateButton(pausePanel.transform, "HomePauseButton", "HOME",
-            new Vector2(0, -140), new Vector2(320, 70), 28);
+            new Vector2(0, -140), new Vector2(320, 70), 28,
+            new Color(0.4f, 0.45f, 0.55f));
 
         // GameManager
         GameObject gmObj = new GameObject("GameManager");
@@ -504,19 +474,29 @@ public class SceneBuilder : EditorWindow
     }
 
     private static GameObject CreateButton(Transform parent, string name, string text,
-        Vector2 anchoredPos, Vector2 size, int fontSize)
+        Vector2 anchoredPos, Vector2 size, int fontSize,
+        Color? bgColor = null, Color? textColor = null)
     {
+        Color bg = bgColor ?? new Color(0.25f, 0.5f, 0.85f);
+        Color fg = textColor ?? Color.white;
+
         GameObject obj = new GameObject(name);
         obj.transform.SetParent(parent, false);
 
         Image img = obj.AddComponent<Image>();
-        img.color = new Color(0.3f, 0.5f, 0.8f);
+        img.color = bg;
+        img.sprite = CreateRoundedRectSprite(64, 64, 16);
+        img.type = Image.Type.Sliced;
+        img.pixelsPerUnitMultiplier = 1f;
 
         Button btn = obj.AddComponent<Button>();
         ColorBlock colors = btn.colors;
-        colors.normalColor = new Color(0.3f, 0.5f, 0.8f);
-        colors.highlightedColor = new Color(0.4f, 0.6f, 0.9f);
-        colors.pressedColor = new Color(0.2f, 0.4f, 0.7f);
+        colors.normalColor = bg;
+        colors.highlightedColor = new Color(
+            Mathf.Min(bg.r + 0.1f, 1f),
+            Mathf.Min(bg.g + 0.1f, 1f),
+            Mathf.Min(bg.b + 0.1f, 1f));
+        colors.pressedColor = new Color(bg.r * 0.8f, bg.g * 0.8f, bg.b * 0.8f);
         btn.colors = colors;
 
         RectTransform rt = obj.GetComponent<RectTransform>();
@@ -530,7 +510,8 @@ public class SceneBuilder : EditorWindow
         tmp.text = text;
         tmp.fontSize = fontSize;
         tmp.alignment = TextAlignmentOptions.Center;
-        tmp.color = Color.white;
+        tmp.color = fg;
+        tmp.fontStyle = FontStyles.Bold;
 
         RectTransform textRT = textObj.GetComponent<RectTransform>();
         textRT.anchorMin = Vector2.zero;
@@ -540,6 +521,39 @@ public class SceneBuilder : EditorWindow
         return obj;
     }
 
+    private static Sprite CreateRoundedRectSprite(int w, int h, int radius)
+    {
+        Texture2D tex = new Texture2D(w, h, TextureFormat.RGBA32, false);
+        tex.filterMode = FilterMode.Bilinear;
+        Color white = Color.white;
+        Color clear = new Color(0, 0, 0, 0);
+
+        for (int y = 0; y < h; y++)
+        {
+            for (int x = 0; x < w; x++)
+            {
+                bool inside = true;
+                // Check corners
+                if (x < radius && y < radius)
+                    inside = (x - radius) * (x - radius) + (y - radius) * (y - radius) <= radius * radius;
+                else if (x > w - radius && y < radius)
+                    inside = (x - (w - radius)) * (x - (w - radius)) + (y - radius) * (y - radius) <= radius * radius;
+                else if (x < radius && y > h - radius)
+                    inside = (x - radius) * (x - radius) + (y - (h - radius)) * (y - (h - radius)) <= radius * radius;
+                else if (x > w - radius && y > h - radius)
+                    inside = (x - (w - radius)) * (x - (w - radius)) + (y - (h - radius)) * (y - (h - radius)) <= radius * radius;
+
+                tex.SetPixel(x, y, inside ? white : clear);
+            }
+        }
+        tex.Apply();
+
+        Vector4 border = new Vector4(radius, radius, radius, radius);
+        Sprite sprite = Sprite.Create(tex, new Rect(0, 0, w, h), new Vector2(0.5f, 0.5f), 100f, 0, SpriteMeshType.FullRect, border);
+        sprite.name = "RoundedRect";
+        return sprite;
+    }
+
     private static GameObject CreatePanel(Transform parent, string name, Vector2 size)
     {
         GameObject obj = new GameObject(name);
@@ -547,6 +561,8 @@ public class SceneBuilder : EditorWindow
 
         Image img = obj.AddComponent<Image>();
         img.color = new Color(0.1f, 0.15f, 0.25f, 0.95f);
+        img.sprite = CreateRoundedRectSprite(128, 128, 24);
+        img.type = Image.Type.Sliced;
 
         RectTransform rt = obj.GetComponent<RectTransform>();
         rt.anchoredPosition = Vector2.zero;

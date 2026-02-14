@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 7156314592993760968}
   - component: {fileID: 1809272841011125732}
   - component: {fileID: 9203890757445365960}
+  - component: {fileID: 4730970473106452401}
   - component: {fileID: 7707024751879389034}
   - component: {fileID: 843825796812841177}
   m_Layer: 0
@@ -129,7 +130,34 @@ CircleCollider2D:
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
-  m_Radius: 0.4
+  m_Radius: 0.5
+--- !u!50 &4730970473106452401
+Rigidbody2D:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4784910195560408171}
+  m_BodyType: 1
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_GravityScale: 0
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 0
 --- !u!114 &7707024751879389034
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -142,7 +170,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5a44e260949604094a305da20c75c5ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Fish
-  swimRange: 1
+  screenEdge: 5
+  minY: -6
+  maxY: -1
 --- !u!114 &843825796812841177
 MonoBehaviour:
   m_ObjectHideFlags: 0
