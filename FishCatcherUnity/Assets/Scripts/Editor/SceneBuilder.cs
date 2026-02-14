@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine.SceneManagement;
+using UnityEngine.EventSystems;
 using TMPro;
 using UnityEngine.UI;
 
@@ -149,6 +150,11 @@ public class SceneBuilder : EditorWindow
         Button btn = playBtn.GetComponent<Button>();
         UnityEditor.Events.UnityEventTools.AddPersistentListener(btn.onClick,
             new UnityEngine.Events.UnityAction(hs.OnPlayPressed));
+
+        // EventSystem (required for UI interaction)
+        GameObject eventSystem = new GameObject("EventSystem");
+        eventSystem.AddComponent<EventSystem>();
+        eventSystem.AddComponent<StandaloneInputModule>();
 
         string scenePath = "Assets/Scenes/HomeScreen.unity";
         EnsureDirectory("Assets/Scenes");
@@ -361,6 +367,11 @@ public class SceneBuilder : EditorWindow
         WireButton(resumeBtn, gm, "OnResumePressed");
         WireButton(restartPauseBtn, gm, "OnRestartFromPause");
         WireButton(homePauseBtn, gm, "OnHomePressed");
+
+        // EventSystem (required for UI interaction)
+        GameObject eventSystem = new GameObject("EventSystem");
+        eventSystem.AddComponent<EventSystem>();
+        eventSystem.AddComponent<StandaloneInputModule>();
 
         string scenePath = "Assets/Scenes/Game.unity";
         EnsureDirectory("Assets/Scenes");

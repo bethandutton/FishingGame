@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 using TMPro;
 
 public class HomeScreen : MonoBehaviour
@@ -28,6 +29,17 @@ public class HomeScreen : MonoBehaviour
 
     private void Start()
     {
+        // Find and wire Play button at runtime
+        Button playButton = FindAnyObjectByType<Button>();
+        if (playButton == null)
+        {
+            // Search by name if multiple buttons exist
+            GameObject btnObj = GameObject.Find("PlayButton");
+            if (btnObj != null) playButton = btnObj.GetComponent<Button>();
+        }
+        if (playButton != null)
+            playButton.onClick.AddListener(OnPlayPressed);
+
         SpawnDecorativeFish();
     }
 

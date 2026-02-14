@@ -7,8 +7,9 @@ EditorBuildSettings:
   m_Scenes:
   - enabled: 1
     path: Assets/Scenes/HomeScreen.unity
-    guid:
+    guid: 805e97ee9014b47ed8756a6474666b85
   - enabled: 1
     path: Assets/Scenes/Game.unity
-    guid:
+    guid: 85272974469c744c4b9af8cb42f1fafc
   m_configObjects: {}
+  m_UseUCBPForAssetBundles: 0

@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 using TMPro;
 
 public class GameManager : MonoBehaviour
@@ -26,9 +27,27 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
+        // Wire buttons at runtime by name
+        WireButton("PauseButton", OnPausePressed);
+        WireButton("RestartButton", OnRestartPressed);
+        WireButton("HomeButton", OnHomePressed);
+        WireButton("ResumeButton", OnResumePressed);
+        WireButton("RestartPauseButton", OnRestartFromPause);
+        WireButton("HomePauseButton", OnHomePressed);
+
         gameOverPanel.SetActive(false);
         pausePanel.SetActive(false);
         StartGame();
+    }
+
+    private void WireButton(string name, UnityEngine.Events.UnityAction action)
+    {
+        GameObject obj = GameObject.Find(name);
+        if (obj != null)
+        {
+            Button btn = obj.GetComponent<Button>();
+            if (btn != null) btn.onClick.AddListener(action);
+        }
     }
 
     public void StartGame()
