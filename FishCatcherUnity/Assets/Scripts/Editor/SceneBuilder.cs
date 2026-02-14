@@ -36,7 +36,6 @@ public class SceneBuilder : EditorWindow
     [MenuItem("Window/Fish Catcher/Build All Now")]
     public static void BuildAllDirect()
     {
-        ClawSpriteGenerator.ClearCache();
         FishSpriteGenerator.ClearCache();
         BackgroundGenerator.ClearCache();
         ConfigureSpriteImports();
@@ -277,6 +276,32 @@ public class SceneBuilder : EditorWindow
         playRT.anchoredPosition = new Vector2(0, -100);
         Button playButton = playBtn.GetComponent<Button>();
 
+        // ── How To Play button (below play, yellow) ──
+        GameObject howToPlayBtn = CreateButton(safeArea.transform, "HowToPlayButton", "HOW TO PLAY",
+            Vector2.zero, new Vector2(560, 150), 32,
+            new Color(0.85f, 0.7f, 0.1f));
+        RectTransform htpRT = howToPlayBtn.GetComponent<RectTransform>();
+        htpRT.anchorMin = new Vector2(0.5f, 0.5f);
+        htpRT.anchorMax = new Vector2(0.5f, 0.5f);
+        htpRT.anchoredPosition = new Vector2(0, -280);
+
+        // ── Introduction Panel (overlay) ──
+        GameObject introPanel = CreatePopupPanel(safeArea.transform, "IntroPanel", new Vector2(900, 1200));
+        introPanel.SetActive(false);
+
+        CreateTMPText(introPanel.transform, "IntroTitle", "HOW TO PLAY",
+            new Vector2(0, 480), 48, TextAlignmentOptions.Center, new Color(1f, 0.9f, 0.5f));
+        CreateTMPText(introPanel.transform, "IntroText",
+            "Hold to cast your\nline into the sea\n\nCatch a fish and\nreel it back to\nyour boat to score\n\nCatch 10 fish\nbefore time runs\nout to win!\n\n+2 seconds for\neach fish caught",
+            new Vector2(0, -30), 28, TextAlignmentOptions.Center);
+        // Make intro text taller to fit all lines
+        GameObject introTextObj = introPanel.transform.Find("IntroText").gameObject;
+        introTextObj.GetComponent<RectTransform>().sizeDelta = new Vector2(750, 800);
+
+        GameObject backBtn = CreateButton(introPanel.transform, "BackButton", "BACK",
+            new Vector2(0, -500), new Vector2(400, 120), 36,
+            new Color(0.25f, 0.5f, 0.85f));
+
         // ── Version label (bottom, non-interactive) ──
         GameObject versionObj = new GameObject("VersionLabel");
         versionObj.transform.SetParent(safeArea.transform, false);
@@ -317,10 +342,19 @@ public class SceneBuilder : EditorWindow
             homeSprites.GetArrayElementAtIndex(i).objectReferenceValue = sprite;
         }
 
+        so.FindProperty("introPanel").objectReferenceValue = introPanel;
         so.ApplyModifiedProperties();
 
         UnityEditor.Events.UnityEventTools.AddPersistentListener(playButton.onClick,
             new UnityEngine.Events.UnityAction(hs.OnPlayPressed));
+
+        // Wire HOW TO PLAY and BACK button events
+        Button htpButton = howToPlayBtn.GetComponent<Button>();
+        UnityEditor.Events.UnityEventTools.AddPersistentListener(htpButton.onClick,
+            new UnityEngine.Events.UnityAction(hs.OnIntroPressed));
+        Button backButton = backBtn.GetComponent<Button>();
+        UnityEditor.Events.UnityEventTools.AddPersistentListener(backButton.onClick,
+            new UnityEngine.Events.UnityAction(hs.OnBackToHome));
 
         // EventSystem
         CreateEventSystem();
@@ -350,33 +384,6 @@ public class SceneBuilder : EditorWindow
         // Underwater pixel art background
         BuildUnderwaterBackground(2f);
 
-        // ── DropZone (bucket) ──
-        GameObject bucket = new GameObject("DropZone");
-        bucket.transform.position = new Vector3(2.5f, 5f, 0);
-        bucket.transform.localScale = new Vector3(0.8f, 0.8f, 1f);
-        SpriteRenderer bucketSr = bucket.AddComponent<SpriteRenderer>();
-        bucketSr.sprite = ClawSpriteGenerator.GetBucketSprite();
-        bucketSr.sortingOrder = 3;
-        BoxCollider2D bucketCol = bucket.AddComponent<BoxCollider2D>();
-        bucketCol.size = new Vector2(2.5f, 2f);
-        bucketCol.isTrigger = true;
-        Rigidbody2D bucketRb = bucket.AddComponent<Rigidbody2D>();
-        bucketRb.bodyType = RigidbodyType2D.Kinematic;
-        bucketRb.gravityScale = 0f;
-        DropZone dropZone = bucket.AddComponent<DropZone>();
-
-        // "DROP" label
-        GameObject dropLabel = new GameObject("DropLabel");
-        dropLabel.transform.SetParent(bucket.transform);
-        dropLabel.transform.localPosition = new Vector3(0, 1.5f, 0);
-        TextMeshPro dropTMP = dropLabel.AddComponent<TextMeshPro>();
-        dropTMP.text = "DROP";
-        dropTMP.fontSize = 4;
-        dropTMP.alignment = TextAlignmentOptions.Center;
-        dropTMP.color = new Color(1f, 0.9f, 0.5f);
-        dropTMP.sortingOrder = 10;
-        ApplyPixelFont(dropTMP);
-
         // ── Fish Spawner ──
         GameObject spawnerObj = new GameObject("FishSpawner");
         spawnerObj.transform.position = Vector3.zero;
@@ -402,43 +409,46 @@ public class SceneBuilder : EditorWindow
             spawnerSo.ApplyModifiedProperties();
         }
 
-        // ── Hook (replaces claw) ──
-        GameObject clawObj = new GameObject("Claw");
-        clawObj.transform.position = new Vector3(0, 9.5f, 0);
-        Claw claw = clawObj.AddComponent<Claw>();
+        // ── Fishing Boat ──
+        GameObject boatObj = new GameObject("FishingBoat");
+        boatObj.transform.position = new Vector3(0, 8.5f, 0);
 
-        // Line end point (invisible - just the tip of the fishing line)
-        GameObject clawHead = new GameObject("ClawHead");
-        clawHead.transform.SetParent(clawObj.transform);
-        clawHead.transform.localPosition = Vector3.zero;
+        // Boat sprite
+        Sprite boatSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/boat.png");
+        SpriteRenderer boatSr = boatObj.AddComponent<SpriteRenderer>();
+        if (boatSprite != null)
+        {
+            boatSr.sprite = boatSprite;
+            // Scale boat to reasonable size (tune based on actual sprite dimensions)
+            float boatScale = 3f / Mathf.Max(boatSprite.bounds.size.x, boatSprite.bounds.size.y);
+            boatObj.transform.localScale = Vector3.one * boatScale;
+        }
+        boatSr.sortingOrder = 7;
 
-        // Placeholder left/right (Claw script references)
-        GameObject clawLeft = new GameObject("ClawLeft");
-        clawLeft.transform.SetParent(clawHead.transform);
-        clawLeft.transform.localPosition = Vector3.zero;
+        FishingBoat boat = boatObj.AddComponent<FishingBoat>();
 
-        GameObject clawRight = new GameObject("ClawRight");
-        clawRight.transform.SetParent(clawHead.transform);
-        clawRight.transform.localPosition = Vector3.zero;
+        // Rod tip (child of boat, starts at anchor offset)
+        GameObject rodTip = new GameObject("RodTip");
+        rodTip.transform.SetParent(boatObj.transform);
+        rodTip.transform.localPosition = new Vector3(-1f, -0.5f, 0);
 
         // Fishing line
-        LineRenderer rope = clawObj.AddComponent<LineRenderer>();
-        rope.positionCount = 2;
-        rope.startWidth = 0.06f;
-        rope.endWidth = 0.06f;
-        rope.material = new Material(Shader.Find("Sprites/Default"));
-        rope.startColor = new Color(0.85f, 0.85f, 0.9f);
-        rope.endColor = new Color(0.85f, 0.85f, 0.9f);
-        rope.useWorldSpace = false;
-        rope.sortingOrder = 6;
+        LineRenderer fishingLine = boatObj.AddComponent<LineRenderer>();
+        fishingLine.positionCount = 2;
+        fishingLine.startWidth = 0.06f;
+        fishingLine.endWidth = 0.06f;
+        fishingLine.material = new Material(Shader.Find("Sprites/Default"));
+        fishingLine.startColor = new Color(0.85f, 0.85f, 0.9f);
+        fishingLine.endColor = new Color(0.85f, 0.85f, 0.9f);
+        fishingLine.useWorldSpace = false;
+        fishingLine.sortingOrder = 6;
 
-        // Wire claw references
-        SerializedObject clawSo = new SerializedObject(claw);
-        clawSo.FindProperty("clawHead").objectReferenceValue = clawHead.transform;
-        clawSo.FindProperty("rope").objectReferenceValue = rope;
-        clawSo.FindProperty("clawLeft").objectReferenceValue = clawLeft.transform;
-        clawSo.FindProperty("clawRight").objectReferenceValue = clawRight.transform;
-        clawSo.ApplyModifiedProperties();
+        // Wire FishingBoat references
+        SerializedObject boatSo = new SerializedObject(boat);
+        boatSo.FindProperty("rodTip").objectReferenceValue = rodTip.transform;
+        boatSo.FindProperty("fishingLine").objectReferenceValue = fishingLine;
+        boatSo.FindProperty("boatRenderer").objectReferenceValue = boatSr;
+        boatSo.ApplyModifiedProperties();
 
         // ── UI Canvas (1080x1920, match height) ──
         GameObject canvasObj = CreateCanvas();
@@ -564,20 +574,14 @@ public class SceneBuilder : EditorWindow
         gmSo.FindProperty("resultLabel").objectReferenceValue = resultObj.GetComponent<TextMeshProUGUI>();
         gmSo.FindProperty("winLoseLabel").objectReferenceValue = winLoseObj.GetComponent<TextMeshProUGUI>();
         gmSo.FindProperty("pausePanel").objectReferenceValue = pausePanel;
-        gmSo.FindProperty("claw").objectReferenceValue = claw;
+        gmSo.FindProperty("boat").objectReferenceValue = boat;
         gmSo.FindProperty("fishSpawner").objectReferenceValue = spawner;
         gmSo.ApplyModifiedProperties();
 
-        // Wire Claw's GameManager reference
-        clawSo = new SerializedObject(claw);
-        clawSo.FindProperty("gameManager").objectReferenceValue = gm;
-        clawSo.ApplyModifiedProperties();
-
-        // Wire DropZone references
-        SerializedObject dzSo = new SerializedObject(dropZone);
-        dzSo.FindProperty("claw").objectReferenceValue = claw;
-        dzSo.FindProperty("gameManager").objectReferenceValue = gm;
-        dzSo.ApplyModifiedProperties();
+        // Wire FishingBoat's GameManager reference
+        boatSo = new SerializedObject(boat);
+        boatSo.FindProperty("gameManager").objectReferenceValue = gm;
+        boatSo.ApplyModifiedProperties();
 
         // Wire button onClick events
         WireButton(pauseBtn, gm, "OnPausePressed");

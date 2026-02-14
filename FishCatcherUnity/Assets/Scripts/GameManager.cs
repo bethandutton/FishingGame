@@ -18,7 +18,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject pausePanel;
 
     [Header("Game References")]
-    [SerializeField] private Claw claw;
+    [SerializeField] private FishingBoat boat;
     [SerializeField] private FishSpawner fishSpawner;
 
     private int score;
@@ -59,8 +59,8 @@ public class GameManager : MonoBehaviour
         isPaused = false;
         Time.timeScale = 1f;
 
-        claw.ResetClaw();
-        claw.SetEnabled(true);
+        boat.ResetBoat();
+        boat.SetEnabled(true);
         fishSpawner.ResetFish();
 
         gameOverPanel.SetActive(false);
@@ -134,7 +134,7 @@ public class GameManager : MonoBehaviour
     private void EndGame()
     {
         gameActive = false;
-        claw.SetEnabled(false);
+        boat.SetEnabled(false);
 
         resultLabel.text = $"You caught {score} fish!";
 
@@ -168,7 +168,7 @@ public class GameManager : MonoBehaviour
         if (!gameActive || isPaused) return;
         isPaused = true;
         Time.timeScale = 0f;
-        claw.SetEnabled(false);
+        boat.SetEnabled(false);
         pausePanel.SetActive(true);
     }
 
@@ -176,7 +176,7 @@ public class GameManager : MonoBehaviour
     {
         isPaused = false;
         Time.timeScale = 1f;
-        claw.SetEnabled(true);
+        boat.SetEnabled(true);
         pausePanel.SetActive(false);
     }
 

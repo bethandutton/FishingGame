@@ -14,10 +14,10 @@ This project has been migrated from **Godot 4.6 → Unity**. Multiplayer has bee
 ### Single Player
 - Catch 10 fish to win, starting with 10 seconds on the clock
 - Each fish caught adds +2 seconds bonus time
-- Touch/click to lower fishing hook, release to grab and raise
-- Drag left/right to move hook horizontally
-- Fish hang at 90 degrees when hooked
-- Drop hooked fish into the bucket to score
+- Boat sits at top of screen with fishing rod
+- Hold to cast line down, drag left/right to move boat
+- Line auto-grabs fish on contact while casting
+- Release or grab triggers retract — fish scores when reeled to boat
 - 15 fish spawn in a grid pattern with randomness
 - Fish swim across the full screen width, wrapping around edges at new depths
 - 16 unique fish species with sprite assets (anglerfish, barracuda, clownfish, etc.)
@@ -25,8 +25,8 @@ This project has been migrated from **Godot 4.6 → Unity**. Multiplayer has bee
 - Haptic feedback on iOS when a fish is caught
 
 ### Screens
-- **Home Screen:** Play button, decorative fish swimming below, pulsing title
-- **Main Game:** Fishing hook, fish spawner, score/timer, bucket, pause menu
+- **Home Screen:** Play button, How To Play button, decorative fish, pulsing title
+- **Main Game:** Fishing boat, rod/line, fish spawner, score/timer, pause menu
 
 ## Project Structure
 
@@ -35,11 +35,10 @@ This project has been migrated from **Godot 4.6 → Unity**. Multiplayer has bee
 Assets/
   Scripts/
     GameManager.cs          - Game loop, scoring, timer (+2s bonus), pause
-    Claw.cs                 - Touch/mouse input, hook mechanics, bucket detection
+    FishingBoat.cs          - Boat + rod mechanic, cast/reel/auto-grab
     Fish.cs                 - Fish swim AI, wrap-around edges, grab/release
     FishSpawner.cs          - Spawn 15 fish, respawn when < 5
-    DropZone.cs             - Bucket collision, scoring
-    HomeScreen.cs           - Menu, decorative wrap-around fish
+    HomeScreen.cs           - Menu, decorative fish, how-to-play panel
     SafeAreaPanel.cs        - iPhone safe area (notch/Dynamic Island) handler
     FloatUpAndFade.cs       - Score popup animation
     FishSpriteGenerator.cs  - Procedural fish sprite (fallback)
@@ -95,9 +94,9 @@ scripts/         - GDScript files (.gd): game logic, fish AI
 ### Unity (C#)
 - **Naming:** PascalCase for classes/methods, camelCase for fields, UPPER_CASE for constants
 - **Input:** Support both touch and mouse (Input.GetTouch + Input.GetMouseButton)
-- **Collision:** CircleCollider2D/BoxCollider2D triggers, Physics2D.OverlapCircleAll for grab detection
+- **Collision:** CircleCollider2D triggers, Physics2D.OverlapCircleAll for grab detection
 - **Animation:** Coroutines for effects, Mathf.Sin for bobbing
-- **State:** Simple enums (ClawState.IDLE/HOLDING)
+- **State:** Simple enums (BoatState.IDLE/CASTING/RETRACTING)
 
 ### iOS UI Conventions
 - **Canvas:** 1080x1920 reference, Scale with Screen Size, match height (1)

@@ -9,6 +9,9 @@ public class HomeScreen : MonoBehaviour
     [SerializeField] private TextMeshProUGUI titleLabel;
     [SerializeField] private RectTransform titleTransform;
 
+    [Header("Panels")]
+    [SerializeField] private GameObject introPanel;
+
     [Header("Decorative Fish")]
     [SerializeField] private GameObject fishPrefab;
     [SerializeField] private Transform fishContainer;
@@ -37,6 +40,18 @@ public class HomeScreen : MonoBehaviour
     public void OnPlayPressed()
     {
         SceneManager.LoadScene("Game");
+    }
+
+    public void OnIntroPressed()
+    {
+        if (introPanel != null)
+            introPanel.SetActive(true);
+    }
+
+    public void OnBackToHome()
+    {
+        if (introPanel != null)
+            introPanel.SetActive(false);
     }
 
     private void SpawnDecorativeFish()
