@@ -220,14 +220,12 @@ public class Claw : MonoBehaviour
 
     private void OpenClaw()
     {
-        if (clawLeft != null) clawLeft.localRotation = Quaternion.Euler(0, 0, -15f);
-        if (clawRight != null) clawRight.localRotation = Quaternion.Euler(0, 0, 15f);
+        // Hook doesn't open/close - no-op
     }
 
     private void CloseClaw()
     {
-        if (clawLeft != null) clawLeft.localRotation = Quaternion.Euler(0, 0, 5f);
-        if (clawRight != null) clawRight.localRotation = Quaternion.Euler(0, 0, -5f);
+        // Hook doesn't open/close - no-op
     }
 
     public void ResetClaw()

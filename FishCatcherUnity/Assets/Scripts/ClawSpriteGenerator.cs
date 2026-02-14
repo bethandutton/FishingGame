@@ -1,94 +1,130 @@
 using UnityEngine;
 
 /// <summary>
-/// Generates procedural hook and bucket sprites.
+/// Generates procedural fishing hook and bucket sprites.
 /// </summary>
 public static class ClawSpriteGenerator
 {
     private static Sprite _hookSprite;
     private static Sprite _bucketSprite;
 
-    public static Sprite GetClawBaseSprite()
+    public static void ClearCache()
     {
-        return GetHookSprite();
+        _hookSprite = null;
+        _bucketSprite = null;
     }
 
-    public static Sprite GetClawArmSprite()
-    {
-        // No longer used - hook replaces claw arms
-        return GetHookSprite();
-    }
+    public static Sprite GetClawBaseSprite() => GetHookSprite();
+    public static Sprite GetClawArmSprite() => GetHookSprite();
 
     public static Sprite GetHookSprite()
     {
         if (_hookSprite != null) return _hookSprite;
 
-        int w = 32, h = 64;
+        int w = 64, h = 128;
         Texture2D tex = new Texture2D(w, h, TextureFormat.RGBA32, false);
         tex.filterMode = FilterMode.Bilinear;
 
-        Color hookColor = new Color(0.75f, 0.75f, 0.78f);
+        Color silver = new Color(0.8f, 0.82f, 0.85f);
+        Color highlight = new Color(0.9f, 0.92f, 0.95f);
         Color clear = new Color(0, 0, 0, 0);
 
-        // Clear all pixels
+        // Clear
         for (int y = 0; y < h; y++)
             for (int x = 0; x < w; x++)
                 tex.SetPixel(x, y, clear);
 
-        int cx = w / 2;
-        int thickness = 3;
+        int shaftX = w / 2;
+        int thickness = 4;
 
-        // Straight shaft from top down to the curve start
-        for (int y = h - 1; y >= h / 3; y--)
+        // Straight shaft from top down to curve start (top 60% of sprite)
+        int curveStartY = (int)(h * 0.35f);
+        for (int y = h - 1; y >= curveStartY; y--)
         {
-            for (int x = cx - thickness; x <= cx + thickness; x++)
+            for (int dx = -thickness; dx <= thickness; dx++)
             {
-                if (x >= 0 && x < w)
-                    tex.SetPixel(x, y, hookColor);
+                int px = shaftX + dx;
+                if (px >= 0 && px < w)
+                {
+                    // Add highlight on one side for 3D effect
+                    Color c = dx <= 0 ? highlight : silver;
+                    tex.SetPixel(px, y, c);
+                }
             }
         }
 
-        // Curved hook at the bottom (J shape)
-        int curveRadius = 8;
-        int curveCenterX = cx + curveRadius;
-        int curveCenterY = h / 3;
+        // Curved J-hook at the bottom
+        int curveRadius = 14;
+        int curveCX = shaftX + curveRadius;
+        int curveCY = curveStartY;
 
         for (int y = 0; y < h; y++)
         {
             for (int x = 0; x < w; x++)
             {
-                float dx = x - curveCenterX;
-                float dy = y - curveCenterY;
+                float dx = x - curveCX;
+                float dy = y - curveCY;
                 float dist = Mathf.Sqrt(dx * dx + dy * dy);
 
-                // Draw the curve (bottom half of circle, left side)
                 if (dist >= curveRadius - thickness && dist <= curveRadius + thickness)
                 {
                     float angle = Mathf.Atan2(dy, dx) * Mathf.Rad2Deg;
-                    // Bottom-left quadrant of the circle (90 to 270 degrees)
-                    if (angle >= 90f || angle <= -90f)
-                        tex.SetPixel(x, y, hookColor);
+                    // Draw the bottom curve (J shape)
+                    if (angle >= 80f || angle <= -90f)
+                    {
+                        Color c = dx <= 0 ? highlight : silver;
+                        tex.SetPixel(x, y, c);
+                    }
                 }
             }
         }
 
-        // Hook point (small barb)
-        int pointX = curveCenterX;
-        int pointY = curveCenterY - curveRadius;
-        for (int dy = 0; dy < 6; dy++)
+        // Hook point / barb (sharp tip pointing up-right)
+        int tipX = curveCX;
+        int tipY = curveCY - curveRadius;
+        for (int i = 0; i < 12; i++)
         {
-            for (int dx = -1; dx <= 3; dx++)
+            for (int dx = -thickness; dx <= thickness + 1; dx++)
             {
-                int px = pointX + dx;
-                int py = pointY + dy;
+                int px = tipX + dx + i / 3;
+                int py = tipY + i;
                 if (px >= 0 && px < w && py >= 0 && py < h)
-                    tex.SetPixel(px, py, hookColor);
+                    tex.SetPixel(px, py, silver);
+            }
+        }
+
+        // Small barb (angled line from tip)
+        for (int i = 0; i < 8; i++)
+        {
+            int px = tipX - i / 2;
+            int py = tipY + i;
+            for (int dx = -2; dx <= 2; dx++)
+            {
+                if (px + dx >= 0 && px + dx < w && py >= 0 && py < h)
+                    tex.SetPixel(px + dx, py, silver);
+            }
+        }
+
+        // Eye hole at top of shaft (small circle)
+        int eyeX = shaftX;
+        int eyeY = h - 8;
+        int eyeR = 4;
+        for (int y2 = eyeY - eyeR; y2 <= eyeY + eyeR; y2++)
+        {
+            for (int x2 = eyeX - eyeR; x2 <= eyeX + eyeR; x2++)
+            {
+                if (x2 >= 0 && x2 < w && y2 >= 0 && y2 < h)
+                {
+                    float d = Mathf.Sqrt((x2 - eyeX) * (x2 - eyeX) + (y2 - eyeY) * (y2 - eyeY));
+                    if (d <= eyeR && d >= eyeR - 2)
+                        tex.SetPixel(x2, y2, highlight);
+                }
             }
         }
 
         tex.Apply();
-        _hookSprite = Sprite.Create(tex, new Rect(0, 0, w, h), new Vector2(0.5f, 1f), 32f);
-        _hookSprite.name = "Hook";
+        _hookSprite = Sprite.Create(tex, new Rect(0, 0, w, h), new Vector2(0.5f, 0.95f), 32f);
+        _hookSprite.name = "FishingHook";
         return _hookSprite;
     }
 

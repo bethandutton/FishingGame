@@ -88,6 +88,7 @@ public class GameManager : MonoBehaviour
         score++;
         timeRemaining += BONUS_TIME;
         UpdateUI();
+        ShowBonusTimePopup();
 
         // Haptic feedback on catch
 #if UNITY_IOS
@@ -101,7 +102,30 @@ public class GameManager : MonoBehaviour
     private void UpdateUI()
     {
         scoreLabel.text = $"{score}";
-        timerLabel.text = $"Time: {Mathf.CeilToInt(timeRemaining)}";
+        timerLabel.text = $"{Mathf.CeilToInt(timeRemaining)}s";
+    }
+
+    private void ShowBonusTimePopup()
+    {
+        // Create a "+2s" UI text near the timer that floats up and fades out
+        GameObject popup = new GameObject("BonusPopup");
+        popup.transform.SetParent(timerLabel.transform.parent, false);
+
+        TextMeshProUGUI tmp = popup.AddComponent<TextMeshProUGUI>();
+        tmp.text = "+2s";
+        tmp.fontSize = 36;
+        tmp.alignment = TextAlignmentOptions.Right;
+        tmp.color = new Color(0.3f, 1f, 0.5f);
+        tmp.fontStyle = FontStyles.Bold;
+
+        RectTransform rt = popup.GetComponent<RectTransform>();
+        rt.anchorMin = new Vector2(1, 0);
+        rt.anchorMax = new Vector2(1, 0);
+        rt.pivot = new Vector2(1, 0);
+        rt.anchoredPosition = new Vector2(-30, 130);
+        rt.sizeDelta = new Vector2(150, 50);
+
+        popup.AddComponent<UIFloatUpAndFade>();
     }
 
     private void EndGame()

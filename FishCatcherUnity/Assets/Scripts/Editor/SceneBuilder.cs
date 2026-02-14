@@ -27,6 +27,8 @@ public class SceneBuilder : EditorWindow
     [MenuItem("Window/Fish Catcher/Build All Now")]
     public static void BuildAllDirect()
     {
+        ClawSpriteGenerator.ClearCache();
+        FishSpriteGenerator.ClearCache();
         BuildFishPrefab();
         BuildHomeScreenScene();
         BuildGameScene();
@@ -351,35 +353,35 @@ public class SceneBuilder : EditorWindow
         fishRT.anchoredPosition = new Vector2(30, -80);
         fishRT.sizeDelta = new Vector2(150, 30);
 
-        // Timer label - top-right, non-interactive
+        // Timer label - bottom-right
         GameObject timerObj = new GameObject("TimerLabel");
         timerObj.transform.SetParent(safeArea.transform, false);
         TextMeshProUGUI timerTMP = timerObj.AddComponent<TextMeshProUGUI>();
-        timerTMP.text = "10";
-        timerTMP.fontSize = 42;
+        timerTMP.text = "10s";
+        timerTMP.fontSize = 48;
         timerTMP.alignment = TextAlignmentOptions.Right;
         timerTMP.color = Color.white;
         timerTMP.fontStyle = FontStyles.Bold;
         RectTransform timerRT = timerObj.GetComponent<RectTransform>();
-        timerRT.anchorMin = new Vector2(1, 1);
-        timerRT.anchorMax = new Vector2(1, 1);
-        timerRT.pivot = new Vector2(1, 1);
-        timerRT.anchoredPosition = new Vector2(-30, -20);
-        timerRT.sizeDelta = new Vector2(200, 60);
+        timerRT.anchorMin = new Vector2(1, 0);
+        timerRT.anchorMax = new Vector2(1, 0);
+        timerRT.pivot = new Vector2(1, 0);
+        timerRT.anchoredPosition = new Vector2(-30, 20);
+        timerRT.sizeDelta = new Vector2(200, 70);
 
-        // Time label
+        // Time sub-label
         GameObject timeLabel = new GameObject("TimeIcon");
         timeLabel.transform.SetParent(safeArea.transform, false);
         TextMeshProUGUI timeTMP = timeLabel.AddComponent<TextMeshProUGUI>();
         timeTMP.text = "TIME";
         timeTMP.fontSize = 24;
         timeTMP.alignment = TextAlignmentOptions.Right;
-        timeTMP.color = new Color(1, 1, 1, 0.6f);
+        timeTMP.color = new Color(1, 1, 1, 0.5f);
         RectTransform timeRT = timeLabel.GetComponent<RectTransform>();
-        timeRT.anchorMin = new Vector2(1, 1);
-        timeRT.anchorMax = new Vector2(1, 1);
-        timeRT.pivot = new Vector2(1, 1);
-        timeRT.anchoredPosition = new Vector2(-30, -80);
+        timeRT.anchorMin = new Vector2(1, 0);
+        timeRT.anchorMax = new Vector2(1, 0);
+        timeRT.pivot = new Vector2(1, 0);
+        timeRT.anchoredPosition = new Vector2(-30, 90);
         timeRT.sizeDelta = new Vector2(150, 30);
 
         // Pause button - top-center, minimum touch target 120px

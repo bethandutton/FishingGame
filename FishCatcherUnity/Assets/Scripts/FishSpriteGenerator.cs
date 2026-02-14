@@ -8,6 +8,11 @@ public class FishSpriteGenerator : MonoBehaviour
 {
     private static Sprite _cachedFishSprite;
 
+    public static void ClearCache()
+    {
+        _cachedFishSprite = null;
+    }
+
     /// <summary>
     /// Creates a simple fish-shaped sprite procedurally.
     /// The SpriteRenderer color property handles coloring.
