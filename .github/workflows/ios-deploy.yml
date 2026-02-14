@@ -1,11 +1,9 @@
 name: iOS Build & Deploy
 
+# Disabled: Godot pipeline replaced by Unity migration.
+# TODO: Replace with Unity build steps when ready.
 on:
-  push:
-    branches: [main]
-    tags:
-      - 'v*'  # Triggers on version tags like v1.0.0
-  workflow_dispatch:  # Allow manual trigger
+  workflow_dispatch:  # Manual trigger only until Unity CI is configured
 
 jobs:
   build-and-deploy:
