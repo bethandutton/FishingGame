@@ -117,6 +117,9 @@ public class GameManager : MonoBehaviour
         tmp.alignment = TextAlignmentOptions.Right;
         tmp.color = new Color(0.3f, 1f, 0.5f);
         tmp.fontStyle = FontStyles.Bold;
+        // Use same font as the timer label
+        if (timerLabel != null)
+            tmp.font = timerLabel.font;
 
         RectTransform rt = popup.GetComponent<RectTransform>();
         rt.anchorMin = new Vector2(1, 0);

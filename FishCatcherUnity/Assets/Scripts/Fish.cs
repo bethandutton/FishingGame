@@ -15,7 +15,7 @@ public class Fish : MonoBehaviour
     private float timeOffset;
     private SpriteRenderer spriteRenderer;
 
-    public void Initialize(Color color, float y)
+    public void Initialize(Sprite sprite, float y)
     {
         baseY = y;
         timeOffset = Random.Range(0f, 10f);
@@ -23,8 +23,11 @@ public class Fish : MonoBehaviour
         swimDirection = Random.value > 0.5f ? 1 : -1;
 
         spriteRenderer = GetComponentInChildren<SpriteRenderer>();
-        if (spriteRenderer != null)
-            spriteRenderer.color = color;
+        if (spriteRenderer != null && sprite != null)
+        {
+            spriteRenderer.sprite = sprite;
+            spriteRenderer.color = Color.white;
+        }
 
         // Face swim direction
         FlipFish(swimDirection);
@@ -62,9 +65,11 @@ public class Fish : MonoBehaviour
 
     private void FlipFish(int direction)
     {
-        Vector3 scale = transform.localScale;
-        scale.x = Mathf.Abs(scale.x) * direction;
-        transform.localScale = scale;
+        if (spriteRenderer == null)
+            spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+        // Sprite faces right by default; flip when swimming left
+        if (spriteRenderer != null)
+            spriteRenderer.flipX = (direction < 0);
     }
 
     public void Grab()

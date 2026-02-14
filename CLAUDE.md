@@ -20,7 +20,7 @@ This project has been migrated from **Godot 4.6 → Unity**. Multiplayer has bee
 - Drop hooked fish into the bucket to score
 - 15 fish spawn in a grid pattern with randomness
 - Fish swim across the full screen width, wrapping around edges at new depths
-- 6 color varieties: Red, Orange, Yellow, Green, Blue, Purple
+- 16 unique fish species with sprite assets (anglerfish, barracuda, clownfish, etc.)
 - Fish respawn when count drops below 5
 - Haptic feedback on iOS when a fish is caught
 
@@ -42,8 +42,12 @@ Assets/
     HomeScreen.cs           - Menu, decorative wrap-around fish
     SafeAreaPanel.cs        - iPhone safe area (notch/Dynamic Island) handler
     FloatUpAndFade.cs       - Score popup animation
-    FishSpriteGenerator.cs  - Procedural fish sprite
+    FishSpriteGenerator.cs  - Procedural fish sprite (fallback)
+  Sprites/
+    Fish/                   - 16 fish species PNG assets
     ClawSpriteGenerator.cs  - Procedural hook/bucket sprites
+    BackgroundGenerator.cs  - Procedural underwater background sprites
+    BubbleAnimator.cs       - Animated rising bubble pool
     ProceduralSetup.cs      - Auto-assigns sprites on prefabs
     Editor/
       SceneBuilder.cs       - One-click scene generation (iOS UI best practices)
@@ -67,6 +71,24 @@ scripts/         - GDScript files (.gd): game logic, fish AI
 - **Android:** AAB format, package from `.env` (`BUNDLE_ID`), min SDK 21, target SDK 34
 - **iOS:** Unity build → Xcode project, deployed via Fastlane
 - **CI/CD:** GitHub Actions - push to `main` → TestFlight, git tag `v*` → App Store
+
+## Art Style
+- **Pixel art / 8-bit retro** aesthetic throughout
+- **Font:** Press Start 2P (Google Fonts) — used for all text via TextMeshPro
+- **Icons & sprites:** Created in Midjourney, edited in Figma, exported as PNGs
+- All procedural sprites use `FilterMode.Point` (no bilinear smoothing)
+- Small textures (8x8 to 128x128) scaled up via transform for chunky pixel look
+- Limited color palettes per element (3-5 colors max)
+- Underwater background: custom PNG background image + animated bubble overlay
+- Button sprites: 4 color variants (Green, Blue, Red, Yellow) loaded from Assets/Sprites/Buttons/
+- Static sprite caching with `ClearCache()` pattern for editor rebuilds
+- Sorting order layers: background (-10 to -3), gameplay (3-6), UI overlay (10-12)
+
+## Important Unity Gotchas
+- **Sprite imports:** Unity imports new PNGs as "Default" texture type — must configure as `TextureImporterType.Sprite` via TextureImporter or they won't render as sprites. SceneBuilder's `ConfigureSpriteImports()` handles this automatically.
+- **Fish direction:** Use `spriteRenderer.flipX` for direction flipping, NOT `localScale.x` manipulation (causes visual issues)
+- **TMP fonts:** Create TMP font assets from TTF via `TMP_FontAsset.CreateFontAsset()` at editor build time, not runtime
+- **Pixel font sizing:** Press Start 2P renders larger than standard fonts — use smaller sizes (title: 72, subtitle: 28, buttons: 42)
 
 ## Code Conventions
 

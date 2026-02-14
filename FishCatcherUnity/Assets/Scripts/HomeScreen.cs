@@ -13,20 +13,11 @@ public class HomeScreen : MonoBehaviour
     [SerializeField] private GameObject fishPrefab;
     [SerializeField] private Transform fishContainer;
     [SerializeField] private int decorativeFishCount = 8;
+    [SerializeField] private Sprite[] fishSprites;
 
     private float[] fishSpeeds;
     private float[] fishBaseY;
     private Transform[] fishTransforms;
-
-    private static readonly Color[] FishColors = new Color[]
-    {
-        new Color(1.0f, 0.3f, 0.3f),
-        new Color(1.0f, 0.6f, 0.2f),
-        new Color(1.0f, 0.9f, 0.2f),
-        new Color(0.3f, 0.8f, 0.3f),
-        new Color(0.3f, 0.5f, 1.0f),
-        new Color(0.6f, 0.3f, 0.8f),
-    };
 
     private void Start()
     {
@@ -34,7 +25,6 @@ public class HomeScreen : MonoBehaviour
         Button playButton = FindAnyObjectByType<Button>();
         if (playButton == null)
         {
-            // Search by name if multiple buttons exist
             GameObject btnObj = GameObject.Find("PlayButton");
             if (btnObj != null) playButton = btnObj.GetComponent<Button>();
         }
@@ -69,19 +59,22 @@ public class HomeScreen : MonoBehaviour
             Fish fishScript = fish.GetComponent<Fish>();
             if (fishScript != null) fishScript.enabled = false;
 
+            // Assign a random fish sprite
             SpriteRenderer sr = fish.GetComponentInChildren<SpriteRenderer>();
-            if (sr != null)
-                sr.color = FishColors[i % FishColors.Length];
+            if (sr != null && fishSprites != null && fishSprites.Length > 0)
+            {
+                sr.sprite = fishSprites[Random.Range(0, fishSprites.Length)];
+                sr.color = Color.white;
+            }
 
             fishTransforms[i] = fish.transform;
             fishBaseY[i] = y;
             float speed = Random.Range(0.5f, 1.3f);
             fishSpeeds[i] = Random.value > 0.5f ? speed : -speed;
 
-            // Face swim direction
-            Vector3 s = fish.transform.localScale;
-            s.x = Mathf.Abs(s.x) * (fishSpeeds[i] > 0 ? 1 : -1);
-            fish.transform.localScale = s;
+            // Face swim direction (flip sprite when going left)
+            if (sr != null)
+                sr.flipX = (fishSpeeds[i] < 0);
         }
     }
 
@@ -97,7 +90,7 @@ public class HomeScreen : MonoBehaviour
             Vector3 pos = fishTransforms[i].position;
             pos.x += fishSpeeds[i] * Time.deltaTime;
 
-            // Wrap around edges - reappear on the other side at a new depth
+            // Wrap around edges
             if (pos.x > 6f)
             {
                 pos.x = -6f;

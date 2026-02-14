@@ -7,22 +7,15 @@ public class FishSpawner : MonoBehaviour
     [SerializeField] private int minFishCount = 5;
     [SerializeField] private GameObject fishPrefab;
 
+    [Header("Fish Sprites")]
+    [SerializeField] private Sprite[] fishSprites;
+
     [Header("Spawn Area (world units)")]
     [SerializeField] private float spawnWidth = 6f;
     [SerializeField] private float spawnHeight = 5f;
     [SerializeField] private float spawnOriginX = -3f;
     [SerializeField] private float spawnOriginY = -1f;
     [SerializeField] private float fishScale = 0.35f;
-
-    private static readonly Color[] FishColors = new Color[]
-    {
-        new Color(1.0f, 0.3f, 0.3f),   // Red
-        new Color(1.0f, 0.6f, 0.2f),   // Orange
-        new Color(1.0f, 0.9f, 0.2f),   // Yellow
-        new Color(0.3f, 0.8f, 0.3f),   // Green
-        new Color(0.3f, 0.5f, 1.0f),   // Blue
-        new Color(0.6f, 0.3f, 0.8f),   // Purple
-    };
 
     private int fishIdCounter;
 
@@ -52,7 +45,17 @@ public class FishSpawner : MonoBehaviour
 
         Fish fish = fishObj.GetComponent<Fish>();
         if (fish != null)
-            fish.Initialize(FishColors[index % FishColors.Length], baseY);
+        {
+            Sprite sprite = GetRandomFishSprite();
+            fish.Initialize(sprite, baseY);
+        }
+    }
+
+    private Sprite GetRandomFishSprite()
+    {
+        if (fishSprites != null && fishSprites.Length > 0)
+            return fishSprites[Random.Range(0, fishSprites.Length)];
+        return null;
     }
 
     public void ResetFish()
